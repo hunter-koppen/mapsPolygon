@@ -17,6 +17,7 @@ export class MapContainer extends Component {
     loadData = () => {
         const { map, maps } = this.state;
         if (this.props.polygonList.items && map && maps) {
+            let bounds = new maps.LatLngBounds();
             this.props.polygonList.items.forEach(mxObject => {
                 const coordinates = this.props.coordinates.get(mxObject).value;
                 const coordinatesParsed = JSON.parse(coordinates);
@@ -38,12 +39,11 @@ export class MapContainer extends Component {
                 });
                 polygon.setMap(map);
 
-                let bounds = new maps.LatLngBounds();
                 for (var i = 0; i < polygon.getPath().getLength(); i++) {
                     bounds.extend(polygon.getPath().getAt(i));
                 }
-                map.fitBounds(bounds);
             });
+            map.fitBounds(bounds);
         }
     };
 
