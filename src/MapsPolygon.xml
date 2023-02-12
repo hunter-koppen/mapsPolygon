@@ -12,5 +12,18 @@
                 <description/>
             </property>
         </propertyGroup>
+        <propertyGroup caption="Datasource">
+                <property key="polygonList" type="datasource" isList="true">
+                    <caption>Polygon List</caption>
+                    <description>List of polygon objects</description>
+                </property>
+                <property key="coordinates" type="attribute" required="true" dataSource="polygonList">
+                    <caption>Coordinates</caption>
+                    <description/>
+                    <attributeTypes>
+                        <attributeType name="String"/>
+                    </attributeTypes>
+                </property>
+            </propertyGroup>
     </properties>
 </widget>

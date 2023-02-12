@@ -5,6 +5,12 @@ import "./ui/MapsPolygon.css";
 
 export class MapsPolygon extends Component {
     render() {
-        return <MapContainer googleKey={this.props.googleKey} />;
+        return (
+            <MapContainer
+                googleKey={this.props.googleKey}
+                polygonList={this.props.polygonList}
+                coordinates={this.props.coordinates}
+            />
+        );
     }
 }
