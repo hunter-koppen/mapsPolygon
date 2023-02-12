@@ -2,7 +2,7 @@ import { Component, createElement } from "react";
 
 import GoogleMapReact from "google-map-react";
 
-export class HelloWorldSample extends Component {
+export class MapContainer extends Component {
     
     render() {
         const defaultProps = {
@@ -15,7 +15,7 @@ export class HelloWorldSample extends Component {
         return (
             <div style={{ height: "600px", width: "800px" }}>
                 <GoogleMapReact
-                    bootstrapURLKeys={{ key: "AIzaSyDV9WEiFQF3VEX1H2Yjg64Pahbv78aaJig" }}
+                    bootstrapURLKeys={{ key: this.props.googleKey }}
                     defaultCenter={defaultProps.center}
                     defaultZoom={defaultProps.zoom}
                 ></GoogleMapReact>
