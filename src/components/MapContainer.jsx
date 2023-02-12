@@ -35,13 +35,19 @@ export class MapContainer extends Component {
                     strokeOpacity: 0.8,
                     strokeWeight: 2,
                     fillColor: "#FF0000",
-                    fillOpacity: 0.35
+                    fillOpacity: 0.35,
+                    id: mxObject.id
                 });
                 polygon.setMap(map);
 
                 for (var i = 0; i < polygon.getPath().getLength(); i++) {
                     bounds.extend(polygon.getPath().getAt(i));
                 }
+
+                maps.event.addListener(polygon, 'click', function (event) {
+                    //alert the index of the polygon
+                    alert(polygon.id);
+                });
             });
             map.fitBounds(bounds);
         }
