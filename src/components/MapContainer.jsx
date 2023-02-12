@@ -5,7 +5,8 @@ import GoogleMapReact from "google-map-react";
 export class MapContainer extends Component {
     state = {
         map: null,
-        maps: null
+        maps: null,
+        polygons: null
     };
 
     componentDidUpdate(prevProps) {
@@ -18,6 +19,7 @@ export class MapContainer extends Component {
         const { map, maps } = this.state;
         if (this.props.polygonList.items && map && maps) {
             let bounds = new maps.LatLngBounds();
+            const polygons = [];
             this.props.polygonList.items.forEach(mxObject => {
                 const coordinates = this.props.coordinates.get(mxObject).value;
                 const coordinatesParsed = JSON.parse(coordinates);
@@ -39,17 +41,25 @@ export class MapContainer extends Component {
                     id: mxObject.id
                 });
                 polygon.setMap(map);
+                polygons.push(polygon);
 
-                for (var i = 0; i < polygon.getPath().getLength(); i++) {
+                for (let i = 0; i < polygon.getPath().getLength(); i++) {
                     bounds.extend(polygon.getPath().getAt(i));
                 }
 
-                maps.event.addListener(polygon, 'click', function (event) {
-                    //alert the index of the polygon
-                    alert(polygon.id);
+                maps.event.addListener(polygon, "click", (event) => {
+                    if (this.props.onClickPolygon && polygon) {
+                        const mxObjectClicked = this.props.polygonList.items.find(mxObject => mxObject.id === polygon.id);
+                        if (mxObjectClicked) {
+                            this.props.onClickPolygon(mxObjectClicked).execute();
+                        }
+                    }
                 });
             });
             map.fitBounds(bounds);
+            this.setState({
+                polygons: polygons
+            });
         }
     };
 

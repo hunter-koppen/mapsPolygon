@@ -24,6 +24,10 @@
                         <attributeType name="String"/>
                     </attributeTypes>
                 </property>
+                <property key="onClickPolygon" type="action" required="false" dataSource="polygonList">
+                    <caption>On Click Action</caption>
+                    <description>Action to trigger when a polygon is clicked</description>
+                </property>
             </propertyGroup>
     </properties>
 </widget>

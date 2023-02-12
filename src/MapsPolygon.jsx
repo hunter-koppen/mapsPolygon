@@ -10,6 +10,7 @@ export class MapsPolygon extends Component {
                 googleKey={this.props.googleKey}
                 polygonList={this.props.polygonList}
                 coordinates={this.props.coordinates}
+                onClickPolygon={this.props.onClickPolygon}
             />
         );
     }
