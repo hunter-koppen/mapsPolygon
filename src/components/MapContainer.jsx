@@ -24,20 +24,23 @@ export class MapContainer extends Component {
 
     loadData = reload => {
         const { map, maps } = this.state;
-        if (reload) {
-            this.clearPolygons();
-        }
         if (this.props.polygonList.items && map && maps) {
             const polygons = [];
+
             this.props.polygonList.items.forEach(mxObject => {
-                debugger;
                 const polygon = this.createPolygon(mxObject, maps);
-                polygon.setMap(map);
-                polygons.push(polygon);
+                if (polygon) {
+                    polygon.setMap(map);
+                    polygons.push(polygon);
+                }
             });
-            if (!reload) {
+
+            if (reload) {
+                this.clearPolygons();
+            } else {
                 this.resizeMap(polygons, maps, map);
             }
+
             this.setState({
                 polygons: polygons
             });
@@ -57,7 +60,7 @@ export class MapContainer extends Component {
         } = this.props;
         try {
             const coordinatesValue = JSON.parse(coordinates.get(mxObject).value);
-            let paths = [];
+            const paths = [];
 
             for (let i = 0; i < coordinatesValue.length; i++) {
                 const newPath = new maps.LatLng(parseFloat(coordinatesValue[i][1]), parseFloat(coordinatesValue[i][0]));
@@ -76,7 +79,7 @@ export class MapContainer extends Component {
 
             maps.event.addListener(polygon, "click", event => {
                 if (onClickPolygon && polygon) {
-                    const mxObjectClicked = polygonList.items.find(mxObject => mxObject.id === polygon.id);
+                    const mxObjectClicked = polygonList.items.find(poly => poly.id === polygon.id);
                     if (mxObjectClicked) {
                         onClickPolygon(mxObjectClicked).execute();
                     }
@@ -85,6 +88,7 @@ export class MapContainer extends Component {
             return polygon;
         } catch (error) {
             console.log(error);
+            return null;
         }
     };
 
