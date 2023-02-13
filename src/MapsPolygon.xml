@@ -7,15 +7,18 @@
     <icon/>
     <properties>
         <propertyGroup caption="General">
-            <property key="googleKey" type="string" required="true">
-                <caption>Google API Key</caption>
-                <description/>
-            </property>
+            <propertyGroup caption="General">
+                <property key="googleKey" type="string" required="true">
+                    <caption>Google API Key</caption>
+                    <description/>
+                </property>
+            </propertyGroup>
         </propertyGroup>
         <propertyGroup caption="Datasource">
+            <propertyGroup caption="Datasource">
                 <property key="polygonList" type="datasource" isList="true">
                     <caption>Polygon List</caption>
-                    <description>List of polygon objects</description>
+                    <description/>
                 </property>
                 <property key="coordinates" type="attribute" required="true" dataSource="polygonList">
                     <caption>Coordinates</caption>
@@ -24,10 +27,48 @@
                         <attributeType name="String"/>
                     </attributeTypes>
                 </property>
+                <property key="fillColor" type="attribute" required="false" dataSource="polygonList">
+                    <caption>Fill Color</caption>
+                    <description/>
+                    <attributeTypes>
+                        <attributeType name="String"/>
+                    </attributeTypes>
+                </property>
+                <property key="fillOpacity" type="attribute" required="false" dataSource="polygonList">
+                    <caption>Fill Opacity</caption>
+                    <description/>
+                    <attributeTypes>
+                        <attributeType name="Decimal"/>
+                    </attributeTypes>
+                </property>
+                <property key="strokeColor" type="attribute" required="false" dataSource="polygonList">
+                    <caption>Stroke Color</caption>
+                    <description/>
+                    <attributeTypes>
+                        <attributeType name="String"/>
+                    </attributeTypes>
+                </property>
+                <property key="strokeOpacity" type="attribute" required="false" dataSource="polygonList">
+                    <caption>Stroke Opacity</caption>
+                    <description/>
+                    <attributeTypes>
+                        <attributeType name="Decimal"/>
+                    </attributeTypes>
+                </property>
+                <property key="strokeWeight" type="attribute" required="false" dataSource="polygonList">
+                    <caption>Stroke Weight</caption>
+                    <description/>
+                    <attributeTypes>
+                        <attributeType name="Decimal"/>
+                    </attributeTypes>
+                </property>
+            </propertyGroup>
+            <propertyGroup caption="Events">
                 <property key="onClickPolygon" type="action" required="false" dataSource="polygonList">
                     <caption>On Click Action</caption>
                     <description>Action to trigger when a polygon is clicked</description>
                 </property>
             </propertyGroup>
+        </propertyGroup>
     </properties>
 </widget>

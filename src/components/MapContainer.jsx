@@ -6,61 +6,105 @@ export class MapContainer extends Component {
     state = {
         map: null,
         maps: null,
-        polygons: null
+        polygons: []
     };
 
     componentDidUpdate(prevProps) {
-        // datasource is loaded so we can create the PolygonList
-        if (prevProps.polygonList.status === "loading" && this.props.polygonList.status === "available") {
-            this.loadData();
+        if (
+            prevProps.polygonList.status === "loading" &&
+            this.props.polygonList.status === "available" &&
+            this.state.map &&
+            this.state.maps
+        ) {
+            this.loadData(false);
+        } else if (prevProps.polygonList.items !== this.props.polygonList.items) {
+            this.loadData(true);
         }
     }
-    loadData = () => {
+
+    loadData = reload => {
         const { map, maps } = this.state;
+        if (reload) {
+            this.clearPolygons();
+        }
         if (this.props.polygonList.items && map && maps) {
-            let bounds = new maps.LatLngBounds();
             const polygons = [];
             this.props.polygonList.items.forEach(mxObject => {
-                const coordinates = this.props.coordinates.get(mxObject).value;
-                const coordinatesParsed = JSON.parse(coordinates);
-                let paths = [];
-                for (let i = 0; i < coordinatesParsed.length; i++) {
-                    let gData = new maps.LatLng(
-                        parseFloat(coordinatesParsed[i][1]),
-                        parseFloat(coordinatesParsed[i][0])
-                    );
-                    paths.push(gData);
-                }
-                const polygon = new maps.Polygon({
-                    paths: paths,
-                    strokeColor: "#FF0000",
-                    strokeOpacity: 0.8,
-                    strokeWeight: 2,
-                    fillColor: "#FF0000",
-                    fillOpacity: 0.35,
-                    id: mxObject.id
-                });
+                debugger;
+                const polygon = this.createPolygon(mxObject, maps);
                 polygon.setMap(map);
                 polygons.push(polygon);
-
-                for (let i = 0; i < polygon.getPath().getLength(); i++) {
-                    bounds.extend(polygon.getPath().getAt(i));
-                }
-
-                maps.event.addListener(polygon, "click", (event) => {
-                    if (this.props.onClickPolygon && polygon) {
-                        const mxObjectClicked = this.props.polygonList.items.find(mxObject => mxObject.id === polygon.id);
-                        if (mxObjectClicked) {
-                            this.props.onClickPolygon(mxObjectClicked).execute();
-                        }
-                    }
-                });
             });
-            map.fitBounds(bounds);
+            if (!reload) {
+                this.resizeMap(polygons, maps, map);
+            }
             this.setState({
                 polygons: polygons
             });
         }
+    };
+
+    createPolygon = (mxObject, maps) => {
+        const {
+            strokeColor,
+            strokeOpacity,
+            strokeWeight,
+            fillColor,
+            fillOpacity,
+            polygonList,
+            coordinates,
+            onClickPolygon
+        } = this.props;
+        try {
+            const coordinatesValue = JSON.parse(coordinates.get(mxObject).value);
+            let paths = [];
+
+            for (let i = 0; i < coordinatesValue.length; i++) {
+                const newPath = new maps.LatLng(parseFloat(coordinatesValue[i][1]), parseFloat(coordinatesValue[i][0]));
+                paths.push(newPath);
+            }
+
+            const polygon = new maps.Polygon({
+                paths: paths,
+                strokeColor: strokeColor ? strokeColor.get(mxObject).value : "#FFFFFF",
+                strokeOpacity: strokeOpacity ? strokeOpacity.get(mxObject).value : 0.8,
+                strokeWeight: strokeWeight ? strokeWeight.get(mxObject).value : 2,
+                fillColor: fillColor ? fillColor.get(mxObject).value : "#F9B20B",
+                fillOpacity: fillOpacity ? fillOpacity.get(mxObject).value : 0.5,
+                id: mxObject.id
+            });
+
+            maps.event.addListener(polygon, "click", event => {
+                if (onClickPolygon && polygon) {
+                    const mxObjectClicked = polygonList.items.find(mxObject => mxObject.id === polygon.id);
+                    if (mxObjectClicked) {
+                        onClickPolygon(mxObjectClicked).execute();
+                    }
+                }
+            });
+            return polygon;
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    clearPolygons = () => {
+        const { maps, polygons } = this.state;
+        if (maps) {
+            polygons.forEach(polygon => {
+                polygon.setMap(null);
+            });
+        }
+    };
+
+    resizeMap = (polygons, maps, map) => {
+        const bounds = new maps.LatLngBounds();
+        polygons.forEach(polygon => {
+            polygon.getPath().forEach(path => {
+                bounds.extend(path);
+            });
+        });
+        map.fitBounds(bounds);
     };
 
     handleApiLoaded = (map, maps) => {
