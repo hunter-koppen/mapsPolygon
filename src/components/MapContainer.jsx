@@ -113,6 +113,14 @@ export class MapContainer extends Component {
 
     handleApiLoaded = (map, maps) => {
         this.setState({ map: map, maps: maps });
+
+        // add map options once the google API is loaded
+        if (this.props.styleArray && this.props.styleArray !== "") {
+            const mapOptions = {
+                styles: JSON.parse(this.props.styleArray)
+              };
+            map.setOptions(mapOptions);
+        }
     };
 
     render() {
