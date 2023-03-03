@@ -46,13 +46,15 @@
  * @param {("web"|"desktop")} target
  * @returns {Properties}
  */
+
+import { hidePropertyIn } from "@mendix/pluggable-widgets-tools";
+
 export function getProperties(values, defaultProperties, target) {
-    // Do the values manipulation here to control the visibility of properties in Studio and Studio Pro conditionally.
-    /* Example
-    if (values.myProperty === "custom") {
-        delete defaultProperties.properties.myOtherProperty;
+    if (values.polygonLabel === "") {
+        hidePropertyIn(defaultProperties, values, "labelColor");
+        hidePropertyIn(defaultProperties, values, "labelSize");
+        hidePropertyIn(defaultProperties, values, "labelClass");
     }
-    */
     return defaultProperties;
 }
 

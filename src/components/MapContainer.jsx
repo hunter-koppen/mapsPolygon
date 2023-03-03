@@ -47,7 +47,7 @@ export class MapContainer extends Component {
                     loaded: true
                 });
             }
-            this.clusterMap(map, labels);
+            this.clusterMap(labels);
             this.setState({
                 polygons: polygons,
                 labels: labels
@@ -101,6 +101,12 @@ export class MapContainer extends Component {
     };
 
     createLabel = (mxObject, polygon, maps) => {
+        const {
+            polygonLabel,
+            labelColor,
+            labelSize,
+            labelClass
+        } = this.props;
         const bounds = new maps.LatLngBounds();
         polygon.getPath().forEach(path => {
             bounds.extend(path);
@@ -110,9 +116,10 @@ export class MapContainer extends Component {
         const markerLabel = new maps.Marker({
             position: centroid,
             label: {
-                text: this.props.polygonLabel.get(mxObject).value,
-                color: "#FFFFFF",
-                fontSize: "12px"
+                text: polygonLabel.get(mxObject).value,
+                color: labelColor ? labelColor.get(mxObject).value : "#000",
+                fontSize: labelSize ? labelSize.get(mxObject).value + "px" : "12px",
+                className: labelClass ? labelClass.get(mxObject).value : "polygon-label",
             },
             icon: {
                 url: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAA1JREFUGFdjyHQt+g8ABFsCIF75EPIAAAAASUVORK5CYII="

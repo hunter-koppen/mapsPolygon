@@ -63,9 +63,30 @@
                     </attributeTypes>
                 </property>
             </propertyGroup>
-             <propertyGroup caption="Polygon labels">
+            <propertyGroup caption="Polygon labels">
                 <property key="polygonLabel" type="attribute" required="false" dataSource="polygonList">
-                    <caption>Label</caption>
+                    <caption>Label Text</caption>
+                    <description/>
+                    <attributeTypes>
+                        <attributeType name="String"/>
+                    </attributeTypes>
+                </property>
+                <property key="labelColor" type="attribute" required="false" dataSource="polygonList">
+                    <caption>Label Color</caption>
+                    <description/>
+                    <attributeTypes>
+                        <attributeType name="String"/>
+                    </attributeTypes>
+                </property>
+                <property key="labelSize" type="attribute" required="false" dataSource="polygonList">
+                    <caption>Label Font Size</caption>
+                    <description/>
+                    <attributeTypes>
+                        <attributeType name="Integer"/>
+                    </attributeTypes>
+                </property>
+                <property key="labelClass" type="attribute" required="false" dataSource="polygonList">
+                    <caption>Label Custom Classname</caption>
                     <description/>
                     <attributeTypes>
                         <attributeType name="String"/>

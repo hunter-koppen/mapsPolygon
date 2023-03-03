@@ -17,6 +17,9 @@ export class MapsPolygon extends Component {
                 strokeOpacity={this.props.strokeOpacity}
                 strokeWeight={this.props.strokeWeight}
                 polygonLabel={this.props.polygonLabel}
+                labelColor={this.props.labelColor}
+                labelSize={this.props.labelSize}
+                labelClass={this.props.labelClass}
                 styleArray={this.props.styleArray}
             />
         );
