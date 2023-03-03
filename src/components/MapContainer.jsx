@@ -4,6 +4,7 @@ import GoogleMapReact from "google-map-react";
 
 export class MapContainer extends Component {
     state = {
+        loaded: false,
         map: null,
         maps: null,
         polygons: []
@@ -11,7 +12,7 @@ export class MapContainer extends Component {
 
     componentDidUpdate(prevProps) {
         if (
-            prevProps.polygonList.status === "loading" &&
+            !this.state.loaded &&
             this.props.polygonList.status === "available" &&
             this.state.map &&
             this.state.maps
@@ -39,6 +40,9 @@ export class MapContainer extends Component {
                 this.clearPolygons();
             } else {
                 this.resizeMap(polygons, maps, map);
+                this.setState({
+                    loaded: true
+                });
             }
 
             this.setState({
