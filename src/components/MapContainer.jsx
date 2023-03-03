@@ -9,14 +9,19 @@ export class MapContainer extends Component {
         maps: null,
         polygons: [],
         labels: [],
-        labelCluster: null
+        labelCluster: null,
+        clickedPolygon: null
     };
 
     componentDidUpdate(prevProps) {
         if (!this.state.loaded && this.props.polygonList.status === "available" && this.state.map && this.state.maps) {
             this.loadData(false);
         } else if (prevProps.polygonList.items !== this.props.polygonList.items) {
-            this.loadData(true);
+            if (this.props.fullReload) {
+                this.loadData(true);
+            } else {
+                this.updatePolygon();
+            }
         }
     }
 
@@ -52,6 +57,31 @@ export class MapContainer extends Component {
                 polygons: polygons,
                 labels: labels
             });
+        }
+    };
+
+    updatePolygon = () => {
+        const { map, maps, clickedPolygon } = this.state;
+        if (this.props.polygonList.items && map && maps) {
+            const mxObjectClicked = this.props.polygonList.items.find(poly => poly.id === clickedPolygon.id);
+            if (mxObjectClicked) {
+                // if found first remove the old polygon
+                const polygons = this.state.polygons;
+                debugger
+                const index = polygons.findIndex(x => x.id === clickedPolygon.id);
+                polygons.splice(index, 1);
+                clickedPolygon.setMap(null);
+
+                // then create a new polygon based on the new input
+                const polygon = this.createPolygon(mxObjectClicked, maps);
+                if (polygon) {
+                    polygon.setMap(map);
+                    polygons.push(polygon);
+                    this.setState({
+                        polygons: polygons
+                    });
+                }
+            }
         }
     };
 
@@ -91,6 +121,9 @@ export class MapContainer extends Component {
                     if (mxObjectClicked) {
                         onClickPolygon(mxObjectClicked).execute();
                     }
+                    this.setState({
+                        clickedPolygon: polygon
+                    });
                 }
             });
             return polygon;
@@ -101,12 +134,7 @@ export class MapContainer extends Component {
     };
 
     createLabel = (mxObject, polygon, maps) => {
-        const {
-            polygonLabel,
-            labelColor,
-            labelSize,
-            labelClass
-        } = this.props;
+        const { polygonLabel, labelColor, labelSize, labelClass } = this.props;
         const bounds = new maps.LatLngBounds();
         polygon.getPath().forEach(path => {
             bounds.extend(path);
@@ -119,7 +147,7 @@ export class MapContainer extends Component {
                 text: polygonLabel.get(mxObject).value,
                 color: labelColor ? labelColor.get(mxObject).value : "#000",
                 fontSize: labelSize ? labelSize.get(mxObject).value + "px" : "12px",
-                className: labelClass ? labelClass.get(mxObject).value : "polygon-label",
+                className: labelClass ? labelClass.get(mxObject).value : "polygon-label"
             },
             icon: {
                 url: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAA1JREFUGFdjyHQt+g8ABFsCIF75EPIAAAAASUVORK5CYII="
@@ -184,12 +212,18 @@ export class MapContainer extends Component {
         this.setState({ map: map, maps: maps, labelCluster: labelCluster });
 
         // add map options once the google API is loaded
+        const mapOptions = {
+            mapTypeControl: this.props.mapTypeControl,
+            zoomControl: this.props.zoomControl,
+            streetViewControl: this.props.streetViewControl,
+            fullscreenControl: this.props.fullscreenControl,
+            scrollwheel: this.props.scrollwheel,
+            mapTypeId: this.props.mapType
+        };
         if (this.props.styleArray && this.props.styleArray !== "") {
-            const mapOptions = {
-                styles: JSON.parse(this.props.styleArray)
-            };
-            map.setOptions(mapOptions);
+            mapOptions.styles = JSON.parse(this.props.styleArray);
         }
+        map.setOptions(mapOptions);
     };
 
     render() {

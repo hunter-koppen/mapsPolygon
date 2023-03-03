@@ -1,95 +1,134 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <widget id="kobeon.mapspolygon.MapsPolygon" pluginWidget="true" needsEntityContext="true" offlineCapable="true" supportedPlatform="Web"
     xmlns="http://www.mendix.com/widget/1.0/"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mendix.com/widget/1.0/ ../node_modules/mendix/custom_widget.xsd">
     <name>Maps Polygon</name>
-    <description/>
-    <icon/>
+    <description />
     <properties>
         <propertyGroup caption="General">
-            <propertyGroup caption="General">
-                <property key="googleKey" type="string" required="true">
+            <propertyGroup caption="Default Settings">
+                <property key="googleKey" type="expression" defaultValue="" required="true">
                     <caption>Google API Key</caption>
+                    <description />
+                    <returnType type="String" />
+                </property>
+                <property key="mapType" type="enumeration" defaultValue="roadmap">
+                    <caption>Map Type</caption>
+                    <description />
+                    <enumerationValues>
+                        <enumerationValue key="roadmap">Roadmap</enumerationValue>
+                        <enumerationValue key="satellite">Satellite</enumerationValue>
+                        <enumerationValue key="hybrid">Hybrid</enumerationValue>
+                        <enumerationValue key="terrain">Terrain</enumerationValue>
+                    </enumerationValues>
+                </property>
+                <property key="scrollwheel" type="boolean" defaultValue="true">
+                    <caption>Scrollwheel</caption>
+                    <description>If false, disables zooming on the map using a mouse scroll wheel.</description>
+                </property>
+                <property key="fullReload" type="boolean" defaultValue="true">
+                    <caption>Full Reload</caption>
+                    <description>If true, re-renders the whole map, if false only reloads the last clicked polygon on refresh.</description>
+                </property>
+            </propertyGroup>
+            <propertyGroup caption="Controls">
+                <property key="mapTypeControl" type="boolean" defaultValue="false">
+                    <caption>Map Type</caption>
                     <description/>
                 </property>
+                <property key="zoomControl" type="boolean" defaultValue="false">
+                    <caption>Zoom</caption>
+                    <description/>
+                </property>
+                <property key="streetViewControl" type="boolean" defaultValue="false">
+                    <caption>StreetView</caption>
+                    <description/>
+                </property>
+                <property key="fullscreenControl" type="boolean" defaultValue="false">
+                    <caption>Fullscreen</caption>
+                    <description/>
+                </property>
+            </propertyGroup>
+            <propertyGroup caption="Visibility">
+                <systemProperty key="Visibility"/>
             </propertyGroup>
         </propertyGroup>
         <propertyGroup caption="Datasource">
             <propertyGroup caption="Polygons">
                 <property key="polygonList" type="datasource" isList="true">
                     <caption>Polygon List</caption>
-                    <description/>
+                    <description />
                 </property>
                 <property key="coordinates" type="attribute" required="true" dataSource="polygonList">
                     <caption>Coordinates</caption>
-                    <description/>
+                    <description />
                     <attributeTypes>
-                        <attributeType name="String"/>
+                        <attributeType name="String" />
                     </attributeTypes>
                 </property>
                 <property key="fillColor" type="attribute" required="false" dataSource="polygonList">
                     <caption>Fill Color</caption>
-                    <description/>
+                    <description />
                     <attributeTypes>
-                        <attributeType name="String"/>
+                        <attributeType name="String" />
                     </attributeTypes>
                 </property>
                 <property key="fillOpacity" type="attribute" required="false" dataSource="polygonList">
                     <caption>Fill Opacity</caption>
-                    <description/>
+                    <description />
                     <attributeTypes>
-                        <attributeType name="Decimal"/>
+                        <attributeType name="Decimal" />
                     </attributeTypes>
                 </property>
                 <property key="strokeColor" type="attribute" required="false" dataSource="polygonList">
                     <caption>Stroke Color</caption>
-                    <description/>
+                    <description />
                     <attributeTypes>
-                        <attributeType name="String"/>
+                        <attributeType name="String" />
                     </attributeTypes>
                 </property>
                 <property key="strokeOpacity" type="attribute" required="false" dataSource="polygonList">
                     <caption>Stroke Opacity</caption>
-                    <description/>
+                    <description />
                     <attributeTypes>
-                        <attributeType name="Decimal"/>
+                        <attributeType name="Decimal" />
                     </attributeTypes>
                 </property>
                 <property key="strokeWeight" type="attribute" required="false" dataSource="polygonList">
                     <caption>Stroke Weight</caption>
-                    <description/>
+                    <description />
                     <attributeTypes>
-                        <attributeType name="Decimal"/>
+                        <attributeType name="Decimal" />
                     </attributeTypes>
                 </property>
             </propertyGroup>
             <propertyGroup caption="Polygon labels">
                 <property key="polygonLabel" type="attribute" required="false" dataSource="polygonList">
                     <caption>Label Text</caption>
-                    <description/>
+                    <description />
                     <attributeTypes>
-                        <attributeType name="String"/>
+                        <attributeType name="String" />
                     </attributeTypes>
                 </property>
                 <property key="labelColor" type="attribute" required="false" dataSource="polygonList">
                     <caption>Label Color</caption>
-                    <description/>
+                    <description />
                     <attributeTypes>
-                        <attributeType name="String"/>
+                        <attributeType name="String" />
                     </attributeTypes>
                 </property>
                 <property key="labelSize" type="attribute" required="false" dataSource="polygonList">
                     <caption>Label Font Size</caption>
-                    <description/>
+                    <description />
                     <attributeTypes>
-                        <attributeType name="Integer"/>
+                        <attributeType name="Integer" />
                     </attributeTypes>
                 </property>
                 <property key="labelClass" type="attribute" required="false" dataSource="polygonList">
                     <caption>Label Custom Classname</caption>
-                    <description/>
+                    <description />
                     <attributeTypes>
-                        <attributeType name="String"/>
+                        <attributeType name="String" />
                     </attributeTypes>
                 </property>
             </propertyGroup>
