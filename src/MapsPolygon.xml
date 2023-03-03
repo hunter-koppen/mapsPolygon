@@ -26,9 +26,10 @@
                     <caption>Scrollwheel</caption>
                     <description>If false, disables zooming on the map using a mouse scroll wheel.</description>
                 </property>
-                <property key="fullReload" type="boolean" defaultValue="true">
+                <property key="fullReload" type="expression" defaultValue="true">
                     <caption>Full Reload</caption>
                     <description>If true, re-renders the whole map, if false only reloads the last clicked polygon on refresh.</description>
+                    <returnType type="Boolean" />
                 </property>
             </propertyGroup>
             <propertyGroup caption="Size">

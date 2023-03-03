@@ -11,7 +11,7 @@ export class MapsPolygon extends Component {
                 scrollwheel={this.props.scrollwheel}
                 mapTypeControl={this.props.mapTypeControl}
                 zoomControl={this.props.zoomControl}
-                fullReload={this.props.fullReload}
+                fullReload={this.props.fullReload.value}
                 width={this.props.width}
                 height={this.props.height}
                 streetViewControl={this.props.streetViewControl}
