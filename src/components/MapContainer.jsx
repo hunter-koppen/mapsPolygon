@@ -7,16 +7,12 @@ export class MapContainer extends Component {
         loaded: false,
         map: null,
         maps: null,
-        polygons: []
+        polygons: [],
+        labels: []
     };
 
     componentDidUpdate(prevProps) {
-        if (
-            !this.state.loaded &&
-            this.props.polygonList.status === "available" &&
-            this.state.map &&
-            this.state.maps
-        ) {
+        if (!this.state.loaded && this.props.polygonList.status === "available" && this.state.map && this.state.maps) {
             this.loadData(false);
         } else if (prevProps.polygonList.items !== this.props.polygonList.items) {
             this.loadData(true);
@@ -27,10 +23,16 @@ export class MapContainer extends Component {
         const { map, maps } = this.state;
         if (this.props.polygonList.items && map && maps) {
             const polygons = [];
+            const labels = [];
 
             this.props.polygonList.items.forEach(mxObject => {
                 const polygon = this.createPolygon(mxObject, maps);
                 if (polygon) {
+                    if (this.props.polygonLabel) {
+                        const markerLabel = this.createLabel(mxObject, polygon, maps);
+                        markerLabel.setMap(map);
+                        labels.push(markerLabel);
+                    }
                     polygon.setMap(map);
                     polygons.push(polygon);
                 }
@@ -40,13 +42,15 @@ export class MapContainer extends Component {
                 this.clearPolygons();
             } else {
                 this.resizeMap(polygons, maps, map);
+                //new MarkerClusterer({ labels, map });
                 this.setState({
                     loaded: true
                 });
             }
 
             this.setState({
-                polygons: polygons
+                polygons: polygons,
+                labels: labels
             });
         }
     };
@@ -96,11 +100,35 @@ export class MapContainer extends Component {
         }
     };
 
+    createLabel = (mxObject, polygon, maps) => {
+        const bounds = new maps.LatLngBounds();
+        polygon.getPath().forEach(path => {
+            bounds.extend(path);
+        });
+        const centroid = bounds.getCenter();
+
+        const markerLabel = new maps.Marker({
+            position: centroid,
+            label: {
+                text: this.props.polygonLabel.get(mxObject).value,
+                color: "#FFFFFF",
+                fontSize: "12px"
+            },
+            icon: {
+                url: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAA1JREFUGFdjyHQt+g8ABFsCIF75EPIAAAAASUVORK5CYII="
+            }
+        });
+        return markerLabel;
+    }
+
     clearPolygons = () => {
-        const { maps, polygons } = this.state;
+        const { maps, polygons, labels } = this.state;
         if (maps) {
             polygons.forEach(polygon => {
                 polygon.setMap(null);
+            });
+            labels.forEach(label => {
+                label.setMap(null);
             });
         }
     };
@@ -122,7 +150,7 @@ export class MapContainer extends Component {
         if (this.props.styleArray && this.props.styleArray !== "") {
             const mapOptions = {
                 styles: JSON.parse(this.props.styleArray)
-              };
+            };
             map.setOptions(mapOptions);
         }
     };

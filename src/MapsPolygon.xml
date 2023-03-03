@@ -15,7 +15,7 @@
             </propertyGroup>
         </propertyGroup>
         <propertyGroup caption="Datasource">
-            <propertyGroup caption="Datasource">
+            <propertyGroup caption="Polygons">
                 <property key="polygonList" type="datasource" isList="true">
                     <caption>Polygon List</caption>
                     <description/>
@@ -60,6 +60,15 @@
                     <description/>
                     <attributeTypes>
                         <attributeType name="Decimal"/>
+                    </attributeTypes>
+                </property>
+            </propertyGroup>
+             <propertyGroup caption="Polygon labels">
+                <property key="polygonLabel" type="attribute" required="false" dataSource="polygonList">
+                    <caption>Label</caption>
+                    <description/>
+                    <attributeTypes>
+                        <attributeType name="String"/>
                     </attributeTypes>
                 </property>
             </propertyGroup>
