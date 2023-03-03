@@ -67,7 +67,6 @@ export class MapContainer extends Component {
             if (mxObjectClicked) {
                 // if found first remove the old polygon
                 const polygons = this.state.polygons;
-                debugger
                 const index = polygons.findIndex(x => x.id === clickedPolygon.id);
                 polygons.splice(index, 1);
                 clickedPolygon.setMap(null);
@@ -188,15 +187,14 @@ export class MapContainer extends Component {
     createClusterer = map => {
         // Create a custom renderer which hides all the cluster icons
         const renderer = {
-            render: ({ count, position }) => {
-                return new google.maps.Marker({
+            render: ({ count, position }) =>
+                new google.maps.Marker({
                     position,
                     icon: {
                         url: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAA1JREFUGFdjyHQt+g8ABFsCIF75EPIAAAAASUVORK5CYII="
                     },
                     zIndex: 1000 + count
-                });
-            }
+                })
         };
         const markerCluster = new MarkerClusterer({
             map,
