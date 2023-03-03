@@ -46,11 +46,11 @@ export const clearMapItems = mapItems => {
     mapItems.length = 0;
 };
 
-export const createClusterer = map => {
+export const createClusterer = (map, maps) => {
     // Create a custom renderer which hides all the cluster icons
     const renderer = {
         render({ count, position }) {
-            return new google.maps.Marker({
+            return new maps.Marker({
                 position,
                 icon: {
                     url: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAA1JREFUGFdjyHQt+g8ABFsCIF75EPIAAAAASUVORK5CYII="

@@ -3,6 +3,7 @@ import { Component, createElement } from "react";
 import GoogleMapReact from "google-map-react";
 
 import { createPolygon } from "./Polygon";
+import { createLabel } from "./Label";
 import { configureMapOptions, resizeMap, clearMapItems, createClusterer, clusterMap } from "./Map";
 
 export class MapContainer extends Component {
@@ -17,130 +18,129 @@ export class MapContainer extends Component {
     };
 
     componentDidUpdate(prevProps) {
-        if (!this.state.loaded && this.props.polygonList.status === "available" && this.state.map && this.state.maps) {
-            this.loadData(false);
-        } else if (prevProps.polygonList.items !== this.props.polygonList.items) {
-            if (this.props.fullReload) {
-                this.loadData(true);
+        const { polygonList, fullReload } = this.props;
+        const { loaded, map, maps } = this.state;
+
+        if (!loaded && polygonList?.status === "available" && map && maps) {
+            this.loadData();
+            return;
+        }
+
+        if (prevProps.polygonList.items !== polygonList.items) {
+            if (fullReload) {
+                this.loadData();
             } else {
                 this.updatePolygon();
             }
         }
     }
 
-    loadData = reload => {
-        const { map, maps } = this.state;
-        if (this.props.polygonList.items && map && maps) {
-            const polygons = [];
-            const labels = [];
+    loadData = () => {
+        const { map, maps, polygons, labels, labelCluster, loaded } = this.state;
+        const { polygonList, polygonLabel, onClickPolygon } = this.props;
+        const newPolygons = [];
+        const newLabels = [];
 
-            this.props.polygonList.items.forEach(mxObject => {
-                const polygon = createPolygon(mxObject, maps, this.props);
-                if (polygon) {
-                    if (this.props.polygonLabel) {
-                        const markerLabel = this.createLabel(mxObject, polygon, maps);
-                        markerLabel.setMap(map);
-                        labels.push(markerLabel);
-                    }
-                    maps.event.addListener(polygon, "click", event => {
-                        if (this.props.onClickPolygon && polygon) {
-                            const mxObjectClicked = this.props.polygonList.items.find(poly => poly.id === polygon.id);
-                            if (mxObjectClicked) {
-                                this.props.onClickPolygon(mxObjectClicked).execute();
-                            }
-                            this.setState({
-                                clickedPolygon: polygon
-                            });
-                        }
-                    });
-                    polygon.setMap(map);
-                    polygons.push(polygon);
+        const createPolygonWithLabel = mxObject => {
+            const newPolygon = createPolygon(mxObject, maps, this.props);
+            if (newPolygon) {
+                if (polygonLabel) {
+                    // if labels have been configured we have to add them for each polygon
+                    const newLabel = createLabel(mxObject, newPolygon, maps, this.props);
+                    newLabel.setMap(map);
+                    newLabels.push(newLabel);
                 }
-            });
+                // if an onClickAction has been set we have to add the event for each polygon
+                if (onClickPolygon) {
+                    maps.event.addListener(newPolygon, "click", event => {
+                        this.handlePolygonClick(onClickPolygon, newPolygon, polygonList);
+                    });
+                }
+                newPolygon.setMap(map);
+                newPolygons.push(newPolygon);
+            }
+        };
 
-            if (reload) {
-                clearMapItems(this.state.polygons);
-                clearMapItems(this.state.labels);
+        if (polygonList.items && map && maps) {
+            // Create all the polygons here
+            polygonList.items.forEach(createPolygonWithLabel);
+            if (loaded) {
+                // when doing a full reload we have to clear all the old polygons and labels
+                clearMapItems(polygons);
+                clearMapItems(labels);
             } else {
-                resizeMap(polygons, maps, map);
+                // this will only run on first load because we need to center on the map
+                resizeMap(newPolygons, maps, map);
                 this.setState({
                     loaded: true
                 });
             }
-            clusterMap(labels, this.state.labelCluster);
+
+            // We then have to add clusters for the labels in case there are too many and they are overlapping
+            clusterMap(newLabels, labelCluster);
+
+            // And finally we can set the new polygons and labels to the state.
             this.setState({
-                polygons: polygons,
-                labels: labels
+                polygons: newPolygons,
+                labels: newLabels
             });
         }
     };
 
     updatePolygon = () => {
-        const { map, maps, clickedPolygon } = this.state;
-        if (this.props.polygonList.items && map && maps) {
-            const mxObjectClicked = this.props.polygonList.items.find(poly => poly.id === clickedPolygon.id);
-            if (mxObjectClicked) {
-                // if found first remove the old polygon
-                const polygons = this.state.polygons;
-                const index = polygons.findIndex(x => x.id === clickedPolygon.id);
-                polygons.splice(index, 1);
+        const { map, maps, clickedPolygon, polygons } = this.state;
+        const { polygonList, onClickPolygon } = this.props;
+
+        if (polygonList?.items && map && maps) {
+            const clickedObject = polygonList.items.find(poly => poly.id === clickedPolygon.id);
+            if (clickedObject) {
+                const newPolygons = polygons;
+
+                // if found first remove the old polygon from the new list
+                const clickedIndex = newPolygons.findIndex(x => x.id === clickedPolygon.id);
+                newPolygons.splice(clickedIndex, 1);
                 clickedPolygon.setMap(null);
 
                 // then create a new polygon based on the new input
-                const polygon = createPolygon(mxObjectClicked, maps, this.props);
-                if (polygon) {
-                    maps.event.addListener(polygon, "click", event => {
-                        if (this.props.onClickPolygon && polygon) {
-                            const mxObjectClicked = this.props.polygonList.items.find(poly => poly.id === polygon.id);
-                            if (mxObjectClicked) {
-                                this.props.onClickPolygon(mxObjectClicked).execute();
-                            }
-                            this.setState({
-                                clickedPolygon: polygon
-                            });
-                        }
-                    });
-                    polygon.setMap(map);
-                    polygons.push(polygon);
+                const newPolygon = createPolygon(clickedObject, maps, this.props);
+
+                if (newPolygon) {
+                    if (onClickPolygon) {
+                        maps.event.addListener(newPolygon, "click", event => {
+                            this.handlePolygonClick(onClickPolygon, newPolygon, polygonList);
+                        });
+                    }
+                    newPolygon.setMap(map);
+                    newPolygons.push(newPolygon);
                     this.setState({
-                        polygons: polygons
+                        polygons: newPolygons
                     });
                 }
             }
         }
     };
 
-    createLabel = (mxObject, polygon, maps) => {
-        const { polygonLabel, labelColor, labelSize, labelClass } = this.props;
-        const bounds = new maps.LatLngBounds();
-        polygon.getPath().forEach(path => {
-            bounds.extend(path);
-        });
-        const centroid = bounds.getCenter();
-
-        const markerLabel = new maps.Marker({
-            position: centroid,
-            label: {
-                text: polygonLabel.get(mxObject).value,
-                color: labelColor ? labelColor.get(mxObject).value : "#000",
-                fontSize: labelSize ? labelSize.get(mxObject).value + "px" : "12px",
-                className: labelClass ? labelClass.get(mxObject).value : "polygon-label"
-            },
-            icon: {
-                url: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAA1JREFUGFdjyHQt+g8ABFsCIF75EPIAAAAASUVORK5CYII="
+    handlePolygonClick = (onClickPolygon, polygon, polygonList) => {
+        if (onClickPolygon && polygon) {
+            const mxObjectClicked = polygonList.items.find(poly => poly.id === polygon.id);
+            if (mxObjectClicked) {
+                onClickPolygon(mxObjectClicked).execute();
             }
-        });
-        return markerLabel;
+            this.setState({
+                clickedPolygon: polygon
+            });
+        }
     };
 
     handleApiLoaded = (map, maps) => {
-        const labelCluster = createClusterer(map);
+        const labelCluster = createClusterer(map, maps);
         const mapOptions = configureMapOptions(this.props);
         map.setOptions(mapOptions);
         this.setState({ map, maps, labelCluster });
     };
 
     render() {
+        const { height, width, googleKey } = this.props;
         const defaultProps = {
             center: {
                 lat: 0,
@@ -148,10 +148,11 @@ export class MapContainer extends Component {
             },
             zoom: 10
         };
+
         return (
-            <div style={{ height: this.props.height, width: this.props.width }}>
+            <div style={{ height, width }}>
                 <GoogleMapReact
-                    bootstrapURLKeys={{ key: this.props.googleKey }}
+                    bootstrapURLKeys={{ key: googleKey }}
                     defaultCenter={defaultProps.center}
                     defaultZoom={defaultProps.zoom}
                     yesIWantToUseGoogleMapApiInternals
