@@ -8,7 +8,8 @@ export class MapContainer extends Component {
         map: null,
         maps: null,
         polygons: [],
-        labels: []
+        labels: [],
+        labelCluster: null
     };
 
     componentDidUpdate(prevProps) {
@@ -42,11 +43,11 @@ export class MapContainer extends Component {
                 this.clearPolygons();
             } else {
                 this.resizeMap(polygons, maps, map);
-                this.clusterMap(map, labels);
                 this.setState({
                     loaded: true
                 });
             }
+            this.clusterMap(map, labels);
             this.setState({
                 polygons: polygons,
                 labels: labels
@@ -142,32 +143,38 @@ export class MapContainer extends Component {
         map.fitBounds(bounds);
     };
 
-    clusterMap = (map, labels) => {
-        if (labels) {
-            // Create a custom renderer which hides all the cluster icons
-            const renderer = {
-                render: ({ count, position }) => {
-                    return new google.maps.Marker({
-                        position,
-                        icon: {
-                            url: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAA1JREFUGFdjyHQt+g8ABFsCIF75EPIAAAAASUVORK5CYII="
-                        },
-                        zIndex: 1000 + count
-                    });
-                }
-            };
-            // initialize the cluster so there are no overlapping labels
-            const markerCluster = new MarkerClusterer({
-                map,
-                markers: labels,
-                algorithm: new SuperClusterAlgorithm({ radius: 80 }),
-                renderer: renderer
-            });
+    clusterMap = labels => {
+        if (labels && this.state.labelCluster) {
+            this.state.labelCluster.clearMarkers();
+            this.state.labelCluster.addMarkers(labels);
         }
     };
 
+    createClusterer = map => {
+        // Create a custom renderer which hides all the cluster icons
+        const renderer = {
+            render: ({ count, position }) => {
+                return new google.maps.Marker({
+                    position,
+                    icon: {
+                        url: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAA1JREFUGFdjyHQt+g8ABFsCIF75EPIAAAAASUVORK5CYII="
+                    },
+                    zIndex: 1000 + count
+                });
+            }
+        };
+        const markerCluster = new MarkerClusterer({
+            map,
+            markers: [],
+            algorithm: new SuperClusterAlgorithm({ radius: 80 }),
+            renderer: renderer
+        });
+        return markerCluster;
+    };
+
     handleApiLoaded = (map, maps) => {
-        this.setState({ map: map, maps: maps });
+        const labelCluster = this.createClusterer(map);
+        this.setState({ map: map, maps: maps, labelCluster: labelCluster });
 
         // add map options once the google API is loaded
         if (this.props.styleArray && this.props.styleArray !== "") {
