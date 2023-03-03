@@ -1,7 +1,7 @@
 import { Component, createElement } from "react";
 
 import GoogleMapReact from "google-map-react";
-
+import { MarkerClusterer, SuperClusterAlgorithm } from "@googlemaps/markerclusterer";
 export class MapContainer extends Component {
     state = {
         loaded: false,
@@ -42,12 +42,11 @@ export class MapContainer extends Component {
                 this.clearPolygons();
             } else {
                 this.resizeMap(polygons, maps, map);
-                //new MarkerClusterer({ labels, map });
+                this.clusterMap(map, labels);
                 this.setState({
                     loaded: true
                 });
             }
-
             this.setState({
                 polygons: polygons,
                 labels: labels
@@ -119,7 +118,7 @@ export class MapContainer extends Component {
             }
         });
         return markerLabel;
-    }
+    };
 
     clearPolygons = () => {
         const { maps, polygons, labels } = this.state;
@@ -141,6 +140,30 @@ export class MapContainer extends Component {
             });
         });
         map.fitBounds(bounds);
+    };
+
+    clusterMap = (map, labels) => {
+        if (labels) {
+            // Create a custom renderer which hides all the cluster icons
+            const renderer = {
+                render: ({ count, position }) => {
+                    return new google.maps.Marker({
+                        position,
+                        icon: {
+                            url: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAA1JREFUGFdjyHQt+g8ABFsCIF75EPIAAAAASUVORK5CYII="
+                        },
+                        zIndex: 1000 + count
+                    });
+                }
+            };
+            // initialize the cluster so there are no overlapping labels
+            const markerCluster = new MarkerClusterer({
+                map,
+                markers: labels,
+                algorithm: new SuperClusterAlgorithm({ radius: 80 }),
+                renderer: renderer
+            });
+        }
     };
 
     handleApiLoaded = (map, maps) => {
