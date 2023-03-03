@@ -31,6 +31,16 @@
                     <description>If true, re-renders the whole map, if false only reloads the last clicked polygon on refresh.</description>
                 </property>
             </propertyGroup>
+            <propertyGroup caption="Size">
+                <property key="width" type="string" defaultValue="800px">
+                    <caption>Width</caption>
+                    <description>The width of the map, it is a string so make sure you enter a valid value (eg. 100% or 200px)</description>
+                </property>
+                <property key="height" type="string" defaultValue="600px">
+                    <caption>Height</caption>
+                    <description>The height of the map, it is a string so make sure you enter a valid value (eg. 100% or 200px)</description>
+                </property>
+            </propertyGroup>
             <propertyGroup caption="Controls">
                 <property key="mapTypeControl" type="boolean" defaultValue="false">
                     <caption>Map Type</caption>

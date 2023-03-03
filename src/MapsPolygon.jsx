@@ -12,6 +12,8 @@ export class MapsPolygon extends Component {
                 mapTypeControl={this.props.mapTypeControl}
                 zoomControl={this.props.zoomControl}
                 fullReload={this.props.fullReload}
+                width={this.props.width}
+                height={this.props.height}
                 streetViewControl={this.props.streetViewControl}
                 fullscreenControl={this.props.fullscreenControl}
                 polygonList={this.props.polygonList}
