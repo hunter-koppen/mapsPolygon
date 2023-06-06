@@ -140,7 +140,7 @@ export class MapContainer extends Component {
     };
 
     render() {
-        const { height, width, googleKey } = this.props;
+        const { height, width, googleKey, classNames } = this.props;
         const defaultProps = {
             center: {
                 lat: 0,
@@ -150,7 +150,7 @@ export class MapContainer extends Component {
         };
 
         return (
-            <div style={{ height, width }}>
+            <div style={{ height, width }} className={"mx-polygonmap " + classNames}>
                 <GoogleMapReact
                     bootstrapURLKeys={{ key: googleKey }}
                     defaultCenter={defaultProps.center}

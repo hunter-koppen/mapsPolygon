@@ -4,6 +4,7 @@ import { MapContainer } from "./components/MapContainer";
 
 export class MapsPolygon extends Component {
     render() {
+        console.log(this.props);
         return (
             <MapContainer
                 googleKey={this.props.googleKey.value}
@@ -29,6 +30,7 @@ export class MapsPolygon extends Component {
                 labelSize={this.props.labelSize}
                 labelClass={this.props.labelClass}
                 styleArray={this.props.styleArray}
+                classNames={this.props.class}
             />
         );
     }
