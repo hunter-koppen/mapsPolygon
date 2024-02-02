@@ -124,7 +124,7 @@ export class MapContainer extends Component {
         if (onClickPolygon && polygon) {
             const mxObjectClicked = polygonList.items.find(poly => poly.id === polygon.id);
             if (mxObjectClicked) {
-                onClickPolygon(mxObjectClicked).execute();
+                onClickPolygon.get(mxObjectClicked).execute();
             }
             this.setState({
                 clickedPolygon: polygon
