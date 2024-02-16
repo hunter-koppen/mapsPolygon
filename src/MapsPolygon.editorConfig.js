@@ -55,6 +55,9 @@ export function getProperties(values, defaultProperties, target) {
         hidePropertyIn(defaultProperties, values, "labelSize");
         hidePropertyIn(defaultProperties, values, "labelClass");
     }
+    if (values.autoZoom === true) {
+        hidePropertyIn(defaultProperties, values, "zoom");
+    }
     return defaultProperties;
 }
 

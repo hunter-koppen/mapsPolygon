@@ -31,6 +31,14 @@
                     <description>If true, re-renders the whole map, if false only reloads the last clicked polygon on refresh.</description>
                     <returnType type="Boolean" />
                 </property>
+                <property key="autoZoom" type="boolean" defaultValue="true">
+                    <caption>Auto-zoom</caption>
+                    <description>By default the map will try and fit the polygon inside the view when loading, you can overwrite this zoom level if wanted.</description>
+                </property>
+                <property key="zoom" type="integer" defaultValue="19">
+                    <caption>Zoom value</caption>
+                    <description>Must be between 1 and 22</description>
+                </property>
             </propertyGroup>
             <propertyGroup caption="Size">
                 <property key="width" type="string" defaultValue="800px">

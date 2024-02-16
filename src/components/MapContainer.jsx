@@ -37,7 +37,7 @@ export class MapContainer extends Component {
 
     loadData = () => {
         const { map, maps, polygons, labels, labelCluster, loaded } = this.state;
-        const { polygonList, polygonLabel, onClickPolygon } = this.props;
+        const { polygonList, polygonLabel, onClickPolygon, autoZoom, zoom } = this.props;
         const newPolygons = [];
         const newLabels = [];
 
@@ -70,7 +70,7 @@ export class MapContainer extends Component {
                 clearMapItems(labels);
             } else {
                 // this will only run on first load because we need to center on the map
-                resizeMap(newPolygons, maps, map);
+                resizeMap(newPolygons, maps, map, autoZoom, zoom);
                 this.setState({
                     loaded: true
                 });
