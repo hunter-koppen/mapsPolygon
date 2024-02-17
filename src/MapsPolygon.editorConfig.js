@@ -58,6 +58,9 @@ export function getProperties(values, defaultProperties, target) {
     if (values.autoZoom === true) {
         hidePropertyIn(defaultProperties, values, "zoom");
     }
+    if (values.autoTilt === true) {
+        hidePropertyIn(defaultProperties, values, "tilt");
+    }
     return defaultProperties;
 }
 

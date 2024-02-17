@@ -15,6 +15,10 @@ export class MapsPolygon extends Component {
                 fullReload={this.props.fullReload.value}
                 autoZoom={this.props.autoZoom}
                 zoom={this.props.zoom}
+                autoTilt={this.props.autoTilt}
+                tilt={this.props.tilt}
+                panByX={this.props.panByX}
+                panByY={this.props.panByY}
                 width={this.props.width}
                 height={this.props.height}
                 streetViewControl={this.props.streetViewControl}

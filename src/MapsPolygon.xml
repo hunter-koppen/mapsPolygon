@@ -22,22 +22,10 @@
                         <enumerationValue key="terrain">Terrain</enumerationValue>
                     </enumerationValues>
                 </property>
-                <property key="scrollwheel" type="boolean" defaultValue="true">
-                    <caption>Scrollwheel</caption>
-                    <description>If false, disables zooming on the map using a mouse scroll wheel.</description>
-                </property>
                 <property key="fullReload" type="expression" defaultValue="true">
                     <caption>Full Reload</caption>
                     <description>If true, re-renders the whole map, if false only reloads the last clicked polygon on refresh.</description>
                     <returnType type="Boolean" />
-                </property>
-                <property key="autoZoom" type="boolean" defaultValue="true">
-                    <caption>Auto-zoom</caption>
-                    <description>By default the map will try and fit the polygon inside the view when loading, you can overwrite this zoom level if wanted.</description>
-                </property>
-                <property key="zoom" type="integer" defaultValue="19">
-                    <caption>Zoom value</caption>
-                    <description>Must be between 1 and 22</description>
                 </property>
             </propertyGroup>
             <propertyGroup caption="Size">
@@ -155,6 +143,42 @@
                 <property key="onClickPolygon" type="action" required="false" dataSource="polygonList">
                     <caption>On Click Action</caption>
                     <description>Action to trigger when a polygon is clicked</description>
+                </property>
+            </propertyGroup>
+        </propertyGroup>
+        <propertyGroup caption="Additional Settings">
+            <propertyGroup caption="Zoom">
+                <property key="scrollwheel" type="boolean" defaultValue="true">
+                    <caption>Scrollwheel</caption>
+                    <description>If false, disables zooming on the map using a mouse scroll wheel.</description>
+                </property>
+                <property key="autoZoom" type="boolean" defaultValue="true">
+                    <caption>Auto-zoom</caption>
+                    <description>By default the map will try and fit the polygon inside the view when loading, you can overwrite this zoom level if wanted.</description>
+                </property>
+                <property key="zoom" type="integer" defaultValue="19">
+                    <caption>Zoom value</caption>
+                    <description>Must be between 1 and 22</description>
+                </property>
+            </propertyGroup>
+            <propertyGroup caption="Tilt">
+                <property key="autoTilt" type="boolean" defaultValue="true">
+                    <caption>Auto-tilt</caption>
+                    <description>Based on the chosen map-type a tilt is chosen.</description>
+                </property>
+                <property key="tilt" type="integer" defaultValue="0">
+                    <caption>Tilt value</caption>
+                    <description>Must be between 0 and 45</description>
+                </property>
+            </propertyGroup>
+            <propertyGroup caption="Pan">
+                <property key="panByX" type="integer" defaultValue="0">
+                    <caption>Pan by X</caption>
+                    <description>Move the map on the X-axis on loading of the map in pixel amount</description>
+                </property>
+                <property key="panByY" type="integer" defaultValue="0">
+                    <caption>Pan by Y</caption>
+                    <description>Move the map on the Y-axis on loading of the map in pixel amount</description>
                 </property>
             </propertyGroup>
         </propertyGroup>

@@ -20,7 +20,7 @@ export const configureMapOptions = props => {
     return mapOptions;
 };
 
-export const resizeMap = (polygons, maps, map, autoZoom, zoom) => {
+export const resizeMap = (polygons, maps, map, autoZoom, zoom, autoTilt, tilt, panByX, panByY) => {
     if (!maps || !map || !Array.isArray(polygons)) {
         console.error("Invalid arguments to resizeMap function");
         return;
@@ -35,6 +35,12 @@ export const resizeMap = (polygons, maps, map, autoZoom, zoom) => {
     map.fitBounds(bounds);
     if (autoZoom === false) {
         map.setZoom(zoom);
+    }
+    if (autoTilt === false) {
+        map.setTilt(tilt);
+    }
+    if (panByX !== 0 || panByY !== 0) {
+        map.panBy(panByX, panByY);
     }
 };
 
