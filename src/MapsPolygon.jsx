@@ -4,7 +4,6 @@ import { MapContainer } from "./components/MapContainer";
 
 export class MapsPolygon extends Component {
     render() {
-        console.log(this.props);
         return (
             <MapContainer
                 googleKey={this.props.googleKey.value}
@@ -19,6 +18,7 @@ export class MapsPolygon extends Component {
                 tilt={this.props.tilt}
                 panByX={this.props.panByX}
                 panByY={this.props.panByY}
+                dutchImagery={this.props.dutchImagery}
                 width={this.props.width}
                 height={this.props.height}
                 streetViewControl={this.props.streetViewControl}

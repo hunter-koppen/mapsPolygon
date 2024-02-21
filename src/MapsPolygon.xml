@@ -181,6 +181,12 @@
                     <description>Move the map on the Y-axis on loading of the map in pixel amount</description>
                 </property>
             </propertyGroup>
+            <propertyGroup caption="Dutch Aerial Imagery">
+                <property key="dutchImagery" type="boolean" defaultValue="false">
+                    <caption>Apply HD dutch imagery</caption>
+                    <description/>
+                </property>
+            </propertyGroup>
         </propertyGroup>
         <propertyGroup caption="Map Styling">
             <propertyGroup caption="Map Styling">

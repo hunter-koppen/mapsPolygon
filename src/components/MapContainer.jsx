@@ -37,8 +37,18 @@ export class MapContainer extends Component {
 
     loadData = () => {
         const { map, maps, polygons, labels, labelCluster, loaded } = this.state;
-        const { polygonList, polygonLabel, onClickPolygon, autoZoom, zoom, autoTilt, tilt, panByX, panByY } =
-            this.props;
+        const {
+            polygonList,
+            polygonLabel,
+            onClickPolygon,
+            autoZoom,
+            zoom,
+            autoTilt,
+            tilt,
+            panByX,
+            panByY,
+            dutchImagery
+        } = this.props;
         const newPolygons = [];
         const newLabels = [];
 
@@ -75,6 +85,28 @@ export class MapContainer extends Component {
                 this.setState({
                     loaded: true
                 });
+            }
+
+            if (dutchImagery) {
+                const WMSLayer = new google.maps.ImageMapType({
+                    // eslint-disable-next-line space-before-function-paren
+                    getTileUrl: function (coord, gZoom) {
+                        var z2 = Math.pow(2, gZoom);
+                        var tileX = coord.x % z2; // Wrap tiles horizontally.
+                        if (tileX < 0) tileX += z2;
+                        var tileY = coord.y;
+
+                        var url =
+                            `https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0/Actueel_orthoHR/` +
+                            `OGC:1.0:GoogleMapsCompatible/${gZoom}/${tileX}/${tileY}.jpeg`;
+                        return url;
+                    },
+                    tileSize: new google.maps.Size(256, 256),
+                    name: "Dutch Aerial Imagery",
+                    maxZoom: 21
+                });
+
+                map.overlayMapTypes.push(WMSLayer);
             }
 
             // We then have to add clusters for the labels in case there are too many and they are overlapping
