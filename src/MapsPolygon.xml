@@ -73,70 +73,52 @@
                         <attributeType name="String" />
                     </attributeTypes>
                 </property>
-                <property key="fillColor" type="attribute" required="false" dataSource="polygonList">
+                <property key="fillColor" type="expression" defaultValue="#F9B20B" required="false" dataSource="polygonList">
                     <caption>Fill Color</caption>
                     <description />
-                    <attributeTypes>
-                        <attributeType name="String" />
-                    </attributeTypes>
+                    <returnType type="String" />
                 </property>
-                <property key="fillOpacity" type="attribute" required="false" dataSource="polygonList">
+                <property key="fillOpacity" type="expression" defaultValue="0.5" required="false" dataSource="polygonList">
                     <caption>Fill Opacity</caption>
                     <description />
-                    <attributeTypes>
-                        <attributeType name="Decimal" />
-                    </attributeTypes>
+                    <returnType type="Decimal" />
                 </property>
-                <property key="strokeColor" type="attribute" required="false" dataSource="polygonList">
+                <property key="strokeColor" type="expression" defaultValue="#FFFFFF" required="false" dataSource="polygonList">
                     <caption>Stroke Color</caption>
                     <description />
-                    <attributeTypes>
-                        <attributeType name="String" />
-                    </attributeTypes>
+                    <returnType type="String" />
                 </property>
-                <property key="strokeOpacity" type="attribute" required="false" dataSource="polygonList">
+                <property key="strokeOpacity" type="expression" defaultValue="1" required="false" dataSource="polygonList">
                     <caption>Stroke Opacity</caption>
                     <description />
-                    <attributeTypes>
-                        <attributeType name="Decimal" />
-                    </attributeTypes>
+                    <returnType type="Decimal" />
                 </property>
-                <property key="strokeWeight" type="attribute" required="false" dataSource="polygonList">
+                <property key="strokeWeight" type="expression" defaultValue="2" required="false" dataSource="polygonList">
                     <caption>Stroke Weight</caption>
                     <description />
-                    <attributeTypes>
-                        <attributeType name="Decimal" />
-                    </attributeTypes>
+                    <returnType type="Decimal" />
                 </property>
             </propertyGroup>
             <propertyGroup caption="Polygon labels">
-                <property key="polygonLabel" type="attribute" required="false" dataSource="polygonList">
+                <property key="polygonLabel" type="expression" required="false" dataSource="polygonList">
                     <caption>Label Text</caption>
                     <description />
-                    <attributeTypes>
-                        <attributeType name="String" />
-                    </attributeTypes>
+                    <returnType type="String" />
                 </property>
-                <property key="labelColor" type="attribute" required="false" dataSource="polygonList">
+                <property key="labelColor" type="expression" defaultValue="#000000" required="false" dataSource="polygonList">
                     <caption>Label Color</caption>
                     <description />
-                    <attributeTypes>
-                        <attributeType name="String" />
-                    </attributeTypes>
+                    <returnType type="String" />
                 </property>
-                <property key="labelSize" type="attribute" required="false" dataSource="polygonList">
+                <property key="labelSize" type="expression" defaultValue="12px" required="false" dataSource="polygonList">
                     <caption>Label Font Size</caption>
                     <description />
-                    <attributeTypes>
-                        <attributeType name="Integer" />
-                    </attributeTypes>
+                    <returnType type="String" />
                 </property>
-                <property key="labelClass" type="attribute" required="false" dataSource="polygonList">
+                <property key="labelClass" type="expression" defaultValue="polygon-label" required="false" dataSource="polygonList">
                     <caption>Label Custom Classname</caption>
                     <description />
-                    <attributeTypes>
-                        <attributeType name="String" />
-                    </attributeTypes>
+                    <returnType type="String" />
                 </property>
             </propertyGroup>
             <propertyGroup caption="Events">

@@ -22,7 +22,10 @@ When loading polygon data it is recommended to shrink the geodata so that the wi
 
 Simply upload a geojson file, click import and then use the simplify feature (top right corner) to shrink the data, in most cases setting it to 1% is perfect for maintaining the shape with the least amount of data.
 
+In most optional fields you can use the $currentObject property if you wish to for example set a different fill color per polygon
+
 I also made a full module using this widget which you can use, it also provides an example of how it can be used. See here:
+[Region Selector](https://marketplace.mendix.com/link/component/211963)
 
 ## Future ideas
 - Add support for multi-line polygons and holes.

@@ -9,7 +9,7 @@ export const createPolygon = (mxObject, maps, props) => {
             strokeColor: strokeColor ? strokeColor.get(mxObject).value : "#FFFFFF",
             strokeOpacity: strokeOpacity ? strokeOpacity.get(mxObject).value : 0.8,
             strokeWeight: strokeWeight ? strokeWeight.get(mxObject).value : 2,
-            fillColor: fillColor ? fillColor.get(mxObject).value : "#F9B20B",
+            fillColor: fillColor ? fillColor.get(mxObject).value : "transparent",
             fillOpacity: fillOpacity ? fillOpacity.get(mxObject).value : 0.5,
             id: mxObject.id
         });
