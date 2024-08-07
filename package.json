@@ -25,10 +25,10 @@
     "release": "pluggable-widgets-tools release:web"
   },
   "devDependencies": {
-    "@mendix/pluggable-widgets-tools": "^9.24.1"
+    "@mendix/pluggable-widgets-tools": "^10.12.1"
   },
   "dependencies": {
-    "@googlemaps/markerclusterer": "^2.0.15",
+    "@googlemaps/markerclusterer": "^2.5.3",
     "classnames": "^2.2.6",
     "google-map-react": "^2.2.1"
   }
