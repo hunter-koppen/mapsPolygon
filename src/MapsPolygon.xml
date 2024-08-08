@@ -73,7 +73,7 @@
                         <attributeType name="String" />
                     </attributeTypes>
                 </property>
-                <property key="fillColor" type="expression" defaultValue="#F9B20B" required="false" dataSource="polygonList">
+                <property key="fillColor" type="expression" defaultValue="'#F9B20B'" required="false" dataSource="polygonList">
                     <caption>Fill Color</caption>
                     <description />
                     <returnType type="String" />
@@ -83,7 +83,7 @@
                     <description />
                     <returnType type="Decimal" />
                 </property>
-                <property key="strokeColor" type="expression" defaultValue="#FFFFFF" required="false" dataSource="polygonList">
+                <property key="strokeColor" type="expression" defaultValue="'#FFFFFF'" required="false" dataSource="polygonList">
                     <caption>Stroke Color</caption>
                     <description />
                     <returnType type="String" />
