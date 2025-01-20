@@ -1,28 +1,12 @@
 import { MarkerClusterer, SuperClusterAlgorithm } from "@googlemaps/markerclusterer";
 
-export const configureMapOptions = props => {
-    const { mapTypeControl, zoomControl, streetViewControl, fullscreenControl, scrollwheel, mapType, styleArray } =
-        props;
-
-    const mapOptions = {
-        mapTypeControlOptions: { visible: mapTypeControl },
-        zoomControlOptions: { visible: zoomControl },
-        streetViewControlOptions: { visible: streetViewControl },
-        fullscreenControlOptions: { visible: fullscreenControl },
-        gestureHandling: scrollwheel ? "greedy" : "none",
-        mapTypeId: mapType
-    };
-
-    if (styleArray && styleArray !== "") {
-        mapOptions.styles = JSON.parse(styleArray);
-    }
-
-    return mapOptions;
-};
-
 export const resizeMap = (polygons, maps, map, autoZoom, zoom, autoTilt, tilt, panByX, panByY) => {
     if (!maps || !map || !Array.isArray(polygons)) {
         console.error("Invalid arguments to resizeMap function");
+        return;
+    }
+
+    if (polygons.length === 0) {
         return;
     }
 
@@ -32,11 +16,13 @@ export const resizeMap = (polygons, maps, map, autoZoom, zoom, autoTilt, tilt, p
             bounds.extend(path);
         });
     });
+    
     map.fitBounds(bounds);
-    if (autoZoom === false) {
+    
+    if (autoZoom === false && zoom) {
         map.setZoom(zoom);
     }
-    if (autoTilt === false) {
+    if (autoTilt === false && tilt) {
         map.setTilt(tilt);
     }
     if (panByX !== 0 || panByY !== 0) {
@@ -49,14 +35,11 @@ export const clearMapItems = mapItems => {
         throw new Error("Input is not an array.");
     }
 
-    mapItems.map(mapItem => mapItem.setMap(null));
-
-    // Clear the array
+    mapItems.forEach(mapItem => mapItem.setMap(null));
     mapItems.length = 0;
 };
 
 export const createClusterer = (map, maps) => {
-    // Create a custom renderer which hides all the cluster icons
     const renderer = {
         render({ count, position }) {
             return new maps.Marker({

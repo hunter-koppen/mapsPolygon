@@ -11,6 +11,7 @@ export class MapsPolygon extends Component {
                 scrollwheel={this.props.scrollwheel}
                 mapTypeControl={this.props.mapTypeControl}
                 zoomControl={this.props.zoomControl}
+                rotateControl={this.props.rotateControl}
                 fullReload={this.props.fullReload.value}
                 autoZoom={this.props.autoZoom}
                 zoom={this.props.zoom}
@@ -35,8 +36,9 @@ export class MapsPolygon extends Component {
                 labelColor={this.props.labelColor}
                 labelSize={this.props.labelSize}
                 labelClass={this.props.labelClass}
-                styleArray={this.props.styleArray}
+                mapId={this.props.mapId}
                 classNames={this.props.class}
+                caching={this.props.caching}
             />
         );
     }

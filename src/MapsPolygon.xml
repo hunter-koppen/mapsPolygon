@@ -1,7 +1,14 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<widget id="kobeon.mapspolygon.MapsPolygon" pluginWidget="true" needsEntityContext="true" offlineCapable="true" supportedPlatform="Web"
+<widget
+    id="kobeon.mapspolygon.MapsPolygon"
+    pluginWidget="true"
+    needsEntityContext="true"
+    offlineCapable="true"
+    supportedPlatform="Web"
     xmlns="http://www.mendix.com/widget/1.0/"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mendix.com/widget/1.0/ ../node_modules/mendix/custom_widget.xsd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.mendix.com/widget/1.0/ ../node_modules/mendix/custom_widget.xsd"
+>
     <name>Maps Polygon</name>
     <description />
     <properties>
@@ -24,40 +31,50 @@
                 </property>
                 <property key="fullReload" type="expression" defaultValue="true">
                     <caption>Full Reload</caption>
-                    <description>If true, re-renders the whole map, if false only reloads the last clicked polygon on refresh.</description>
+                    <description>
+                        If true, re-renders the whole map, if false only reloads the last clicked polygon on refresh.
+                    </description>
                     <returnType type="Boolean" />
                 </property>
             </propertyGroup>
             <propertyGroup caption="Size">
                 <property key="width" type="string" defaultValue="800px">
                     <caption>Width</caption>
-                    <description>The width of the map, it is a string so make sure you enter a valid value (eg. 100% or 200px)</description>
+                    <description>
+                        The width of the map, it is a string so make sure you enter a valid value (eg. 100% or 200px)
+                    </description>
                 </property>
                 <property key="height" type="string" defaultValue="600px">
                     <caption>Height</caption>
-                    <description>The height of the map, it is a string so make sure you enter a valid value (eg. 100% or 200px)</description>
+                    <description>
+                        The height of the map, it is a string so make sure you enter a valid value (eg. 100% or 200px)
+                    </description>
                 </property>
             </propertyGroup>
             <propertyGroup caption="Controls">
                 <property key="mapTypeControl" type="boolean" defaultValue="false">
                     <caption>Map Type</caption>
-                    <description/>
+                    <description />
                 </property>
                 <property key="zoomControl" type="boolean" defaultValue="false">
                     <caption>Zoom</caption>
-                    <description/>
+                    <description />
                 </property>
                 <property key="streetViewControl" type="boolean" defaultValue="false">
                     <caption>StreetView</caption>
-                    <description/>
+                    <description />
                 </property>
                 <property key="fullscreenControl" type="boolean" defaultValue="false">
                     <caption>Fullscreen</caption>
-                    <description/>
+                    <description />
+                </property>
+                <property key="rotateControl" type="boolean" defaultValue="false">
+                    <caption>Rotate</caption>
+                    <description />
                 </property>
             </propertyGroup>
             <propertyGroup caption="Visibility">
-                <systemProperty key="Visibility"/>
+                <systemProperty key="Visibility" />
             </propertyGroup>
         </propertyGroup>
         <propertyGroup caption="Datasource">
@@ -73,27 +90,57 @@
                         <attributeType name="String" />
                     </attributeTypes>
                 </property>
-                <property key="fillColor" type="expression" defaultValue="'#F9B20B'" required="false" dataSource="polygonList">
+                <property
+                    key="fillColor"
+                    type="expression"
+                    defaultValue="'#F9B20B'"
+                    required="false"
+                    dataSource="polygonList"
+                >
                     <caption>Fill Color</caption>
                     <description />
                     <returnType type="String" />
                 </property>
-                <property key="fillOpacity" type="expression" defaultValue="0.5" required="false" dataSource="polygonList">
+                <property
+                    key="fillOpacity"
+                    type="expression"
+                    defaultValue="0.5"
+                    required="false"
+                    dataSource="polygonList"
+                >
                     <caption>Fill Opacity</caption>
                     <description />
                     <returnType type="Decimal" />
                 </property>
-                <property key="strokeColor" type="expression" defaultValue="'#FFFFFF'" required="false" dataSource="polygonList">
+                <property
+                    key="strokeColor"
+                    type="expression"
+                    defaultValue="'#FFFFFF'"
+                    required="false"
+                    dataSource="polygonList"
+                >
                     <caption>Stroke Color</caption>
                     <description />
                     <returnType type="String" />
                 </property>
-                <property key="strokeOpacity" type="expression" defaultValue="1" required="false" dataSource="polygonList">
+                <property
+                    key="strokeOpacity"
+                    type="expression"
+                    defaultValue="1"
+                    required="false"
+                    dataSource="polygonList"
+                >
                     <caption>Stroke Opacity</caption>
                     <description />
                     <returnType type="Decimal" />
                 </property>
-                <property key="strokeWeight" type="expression" defaultValue="2" required="false" dataSource="polygonList">
+                <property
+                    key="strokeWeight"
+                    type="expression"
+                    defaultValue="2"
+                    required="false"
+                    dataSource="polygonList"
+                >
                     <caption>Stroke Weight</caption>
                     <description />
                     <returnType type="Decimal" />
@@ -105,17 +152,35 @@
                     <description />
                     <returnType type="String" />
                 </property>
-                <property key="labelColor" type="expression" defaultValue="#000000" required="false" dataSource="polygonList">
+                <property
+                    key="labelColor"
+                    type="expression"
+                    defaultValue="#000000"
+                    required="false"
+                    dataSource="polygonList"
+                >
                     <caption>Label Color</caption>
                     <description />
                     <returnType type="String" />
                 </property>
-                <property key="labelSize" type="expression" defaultValue="12px" required="false" dataSource="polygonList">
+                <property
+                    key="labelSize"
+                    type="expression"
+                    defaultValue="12px"
+                    required="false"
+                    dataSource="polygonList"
+                >
                     <caption>Label Font Size</caption>
                     <description />
                     <returnType type="String" />
                 </property>
-                <property key="labelClass" type="expression" defaultValue="polygon-label" required="false" dataSource="polygonList">
+                <property
+                    key="labelClass"
+                    type="expression"
+                    defaultValue="polygon-label"
+                    required="false"
+                    dataSource="polygonList"
+                >
                     <caption>Label Custom Classname</caption>
                     <description />
                     <returnType type="String" />
@@ -136,7 +201,10 @@
                 </property>
                 <property key="autoZoom" type="boolean" defaultValue="true">
                     <caption>Auto-zoom</caption>
-                    <description>By default the map will try and fit the polygon inside the view when loading, you can overwrite this zoom level if wanted.</description>
+                    <description>
+                        By default the map will try and fit the polygon inside the view when loading, you can overwrite
+                        this zoom level if wanted.
+                    </description>
                 </property>
                 <property key="zoom" type="integer" defaultValue="19">
                     <caption>Zoom value</caption>
@@ -163,18 +231,24 @@
                     <description>Move the map on the Y-axis on loading of the map in pixel amount</description>
                 </property>
             </propertyGroup>
+            <propertyGroup caption="Caching">
+                <property key="caching" type="boolean" defaultValue="true">
+                    <caption>Cache map for faster loading</caption>
+                    <description />
+                </property>
+            </propertyGroup>
             <propertyGroup caption="Dutch Aerial Imagery">
                 <property key="dutchImagery" type="boolean" defaultValue="false">
                     <caption>Apply HD dutch imagery</caption>
-                    <description/>
+                    <description />
                 </property>
             </propertyGroup>
         </propertyGroup>
         <propertyGroup caption="Map Styling">
             <propertyGroup caption="Map Styling">
-                <property key="styleArray" type="string" multiline="true" required="false">
-                    <caption>Style Array</caption>
-                    <description>Use this to add custom styles to your maps.</description>
+                <property key="mapId" type="string" required="false">
+                    <caption>Map ID</caption>
+                    <description>Used to apply a custom map style to the map.</description>
                 </property>
             </propertyGroup>
         </propertyGroup>
