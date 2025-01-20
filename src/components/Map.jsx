@@ -5,11 +5,11 @@ export const configureMapOptions = props => {
         props;
 
     const mapOptions = {
-        mapTypeControl,
-        zoomControl,
-        streetViewControl,
-        fullscreenControl,
-        scrollwheel,
+        mapTypeControlOptions: { visible: mapTypeControl },
+        zoomControlOptions: { visible: zoomControl },
+        streetViewControlOptions: { visible: streetViewControl },
+        fullscreenControlOptions: { visible: fullscreenControl },
+        gestureHandling: scrollwheel ? "greedy" : "none",
         mapTypeId: mapType
     };
 

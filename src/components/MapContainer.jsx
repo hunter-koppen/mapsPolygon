@@ -1,6 +1,5 @@
 import { Component, createElement } from "react";
-
-import GoogleMapReact from "google-map-react";
+import { APIProvider, Map, useMap } from "@vis.gl/react-google-maps";
 
 import { createPolygon } from "./Polygon";
 import { createLabel } from "./Label";
@@ -165,32 +164,32 @@ export class MapContainer extends Component {
         }
     };
 
-    handleApiLoaded = (map, maps) => {
+    handleMapLoad = map => {
+        const maps = window.google.maps;
         const labelCluster = createClusterer(map, maps);
         const mapOptions = configureMapOptions(this.props);
-        map.setOptions(mapOptions);
+        Object.entries(mapOptions).forEach(([key, value]) => {
+            map.set(key, value);
+        });
         this.setState({ map, maps, labelCluster });
     };
 
     render() {
         const { height, width, googleKey, classNames } = this.props;
-        const defaultProps = {
-            center: {
-                lat: 0,
-                lng: 0
-            },
-            zoom: 10
-        };
+        const defaultCenter = { lat: 0, lng: 0 };
+        const defaultZoom = 10;
 
         return (
             <div style={{ height, width }} className={"mx-polygonmap " + classNames}>
-                <GoogleMapReact
-                    bootstrapURLKeys={{ key: googleKey }}
-                    defaultCenter={defaultProps.center}
-                    defaultZoom={defaultProps.zoom}
-                    yesIWantToUseGoogleMapApiInternals
-                    onGoogleApiLoaded={({ map, maps }) => this.handleApiLoaded(map, maps)}
-                ></GoogleMapReact>
+                <APIProvider apiKey={googleKey}>
+                    <Map
+                        defaultCenter={defaultCenter}
+                        defaultZoom={defaultZoom}
+                        onLoad={this.handleMapLoad}
+                        gestureHandling={"greedy"}
+                        disableDefaultUI={true}
+                    />
+                </APIProvider>
             </div>
         );
     }
