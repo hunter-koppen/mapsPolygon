@@ -1,5 +1,5 @@
 import { createElement, useState, useEffect, useCallback, useRef } from "react";
-import { APIProvider, Map } from "@vis.gl/react-google-maps";
+import { APIProvider, Map, useMap } from "@vis.gl/react-google-maps";
 
 import { createPolygon } from "./Polygon";
 import { createLabel } from "./Label";
@@ -12,7 +12,8 @@ export function MapContainer(props) {
         polygons: [],
         labels: [],
         labelCluster: null,
-        clickedPolygon: null
+        clickedPolygon: null,
+        currentZoom: null
     });
 
     const prevPolygonListRef = useRef(props.polygonList);
@@ -42,10 +43,33 @@ export function MapContainer(props) {
             tilt,
             panByX,
             panByY,
-            dutchImagery
+            dutchImagery,
+            coordinates
         } = props;
         const newPolygons = [];
         const newLabels = [];
+
+        if (polygonList.items && map && !loaded) {
+            const bounds = new google.maps.LatLngBounds();
+            polygonList.items.forEach(mxObject => {
+                const coords = JSON.parse(coordinates.get(mxObject).value);
+                coords.forEach(coord => {
+                    bounds.extend({ lat: coord[1], lng: coord[0] });
+                });
+            });
+
+            map.fitBounds(bounds, { animation: false });
+
+            if (autoZoom === false && zoom) {
+                const boundsListener = google.maps.event.addListenerOnce(map, "bounds_changed", () => {
+                    setState(prev => ({ ...prev, currentZoom: zoom }));
+                    // Clear the zoom after a brief moment
+                    setTimeout(() => {
+                        setState(prev => ({ ...prev, currentZoom: undefined }));
+                    }, 100);
+                });
+            }
+        }
 
         const createPolygonWithLabel = mxObject => {
             const newPolygon = createPolygon(mxObject, google.maps, props);
@@ -139,35 +163,41 @@ export function MapContainer(props) {
         }
     }, [state, props]);
 
-    const handleMapLoad = useCallback(mapEvent => {
-        const map = mapEvent.map;
-        const labelCluster = createClusterer(map, google.maps);
-        setState(prev => ({ ...prev, map, labelCluster }));
-    }, []);
+    function MapContent() {
+        const map = useMap();
 
-    useEffect(() => {
-        const { polygonList, fullReload } = props;
-        const { loaded, map } = state;
+        useEffect(() => {
+            if (!map) return;
 
-        if (!loaded && polygonList?.status === "available" && map) {
-            loadData();
-            return;
-        }
-
-        if (polygonList.items !== prevPolygonListRef.current?.items && map) {
-            if (fullReload) {
-                loadData();
-            } else {
-                updatePolygon();
+            // Initialize map and cluster if not loaded
+            if (!state.loaded) {
+                const labelCluster = createClusterer(map, google.maps);
+                setState(prev => ({ ...prev, map, labelCluster }));
             }
-        }
 
-        prevPolygonListRef.current = polygonList;
-    }, [props.polygonList, props.fullReload, state.loaded, state.map, loadData, updatePolygon]);
+            // Handle polygon loading and updates
+            const { polygonList, fullReload } = props;
+            if (!state.loaded && polygonList?.status === "available") {
+                loadData();
+                return;
+            }
+
+            if (polygonList.items !== prevPolygonListRef.current?.items) {
+                if (fullReload) {
+                    loadData();
+                } else {
+                    updatePolygon();
+                }
+            }
+
+            prevPolygonListRef.current = polygonList;
+        }, [map, props.polygonList, props.fullReload, state.loaded, loadData, updatePolygon]);
+
+        return null;
+    }
 
     const { height, width, googleKey, classNames } = props;
     const defaultCenter = { lat: 52.383564, lng: 4.645537 };
-    const defaultZoom = 10;
 
     return (
         <div style={{ height, width }} className={"mx-polygonmap " + classNames}>
@@ -175,8 +205,7 @@ export function MapContainer(props) {
                 <Map
                     reuseMaps={props.caching}
                     defaultCenter={defaultCenter}
-                    defaultZoom={defaultZoom}
-                    onIdle={!state.loaded ? handleMapLoad : null}
+                    zoom={state.currentZoom}
                     mapId={props.mapId}
                     mapTypeId={props.mapType}
                     disableDefaultUI={true}
@@ -186,7 +215,9 @@ export function MapContainer(props) {
                     rotateControl={props.rotateControl}
                     cameraControl={props.cameraControl}
                     gestureHandling={props.scrollwheel ? "greedy" : "none"}
-                />
+                >
+                    <MapContent />
+                </Map>
             </APIProvider>
         </div>
     );
