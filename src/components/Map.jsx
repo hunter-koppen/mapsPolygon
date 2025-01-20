@@ -16,9 +16,9 @@ export const resizeMap = (polygons, maps, map, autoZoom, zoom, autoTilt, tilt, p
             bounds.extend(path);
         });
     });
-    
+
     map.fitBounds(bounds);
-    
+
     if (autoZoom === false && zoom) {
         map.setZoom(zoom);
     }

@@ -14,8 +14,21 @@ export function MapContainer(props) {
         labelCluster: null,
         clickedPolygon: null
     });
-    
+
     const prevPolygonListRef = useRef(props.polygonList);
+
+    const handlePolygonClick = useCallback((onClickPolygon, polygon, polygonList) => {
+        if (onClickPolygon && polygon) {
+            const mxObjectClicked = polygonList.items.find(poly => poly.id === polygon.id);
+            if (mxObjectClicked) {
+                onClickPolygon.get(mxObjectClicked).execute();
+            }
+            setState(prev => ({
+                ...prev,
+                clickedPolygon: polygon
+            }));
+        }
+    }, []);
 
     const loadData = useCallback(() => {
         const { map, polygons, labels, labelCluster, loaded } = state;
@@ -64,6 +77,7 @@ export function MapContainer(props) {
 
             if (dutchImagery) {
                 const WMSLayer = new google.maps.ImageMapType({
+                    // eslint-disable-next-line space-before-function-paren
                     getTileUrl: function (coord, gZoom) {
                         var z2 = Math.pow(2, gZoom);
                         var tileX = coord.x % z2;
@@ -124,19 +138,6 @@ export function MapContainer(props) {
             }
         }
     }, [state, props]);
-
-    const handlePolygonClick = useCallback((onClickPolygon, polygon, polygonList) => {
-        if (onClickPolygon && polygon) {
-            const mxObjectClicked = polygonList.items.find(poly => poly.id === polygon.id);
-            if (mxObjectClicked) {
-                onClickPolygon.get(mxObjectClicked).execute();
-            }
-            setState(prev => ({
-                ...prev,
-                clickedPolygon: polygon
-            }));
-        }
-    }, []);
 
     const handleMapLoad = useCallback(mapEvent => {
         const map = mapEvent.map;
