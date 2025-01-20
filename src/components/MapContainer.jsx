@@ -3,7 +3,7 @@ import { APIProvider, Map, useMap } from "@vis.gl/react-google-maps";
 
 import { createPolygon } from "./Polygon";
 import { createLabel } from "./Label";
-import { resizeMap, clearMapItems, createClusterer, clusterMap } from "./Map";
+import { clearMapItems, createClusterer, clusterMap } from "./Map";
 
 export function MapContainer(props) {
     const [state, setState] = useState({
@@ -69,6 +69,13 @@ export function MapContainer(props) {
                     }, 100);
                 });
             }
+
+            if (autoTilt === false && tilt) {
+                map.setTilt(tilt);
+            }
+            if (panByX !== 0 || panByY !== 0) {
+                map.panBy(panByX, panByY);
+            }
         }
 
         const createPolygonWithLabel = mxObject => {
@@ -95,7 +102,6 @@ export function MapContainer(props) {
                 clearMapItems(polygons);
                 clearMapItems(labels);
             } else {
-                resizeMap(newPolygons, google.maps, map, autoZoom, zoom, autoTilt, tilt, panByX, panByY);
                 setState(prev => ({ ...prev, loaded: true }));
             }
 

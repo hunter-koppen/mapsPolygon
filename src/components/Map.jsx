@@ -1,35 +1,5 @@
 import { MarkerClusterer, SuperClusterAlgorithm } from "@googlemaps/markerclusterer";
 
-export const resizeMap = (polygons, maps, map, autoZoom, zoom, autoTilt, tilt, panByX, panByY) => {
-    if (!maps || !map || !Array.isArray(polygons)) {
-        console.error("Invalid arguments to resizeMap function");
-        return;
-    }
-
-    if (polygons.length === 0) {
-        return;
-    }
-
-    const bounds = new maps.LatLngBounds();
-    polygons.forEach(polygon => {
-        polygon.getPath().forEach(path => {
-            bounds.extend(path);
-        });
-    });
-
-    map.fitBounds(bounds);
-
-    if (autoZoom === false && zoom) {
-        map.setZoom(zoom);
-    }
-    if (autoTilt === false && tilt) {
-        map.setTilt(tilt);
-    }
-    if (panByX !== 0 || panByY !== 0) {
-        map.panBy(panByX, panByY);
-    }
-};
-
 export const clearMapItems = mapItems => {
     if (!Array.isArray(mapItems)) {
         throw new Error("Input is not an array.");
