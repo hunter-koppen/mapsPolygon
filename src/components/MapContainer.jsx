@@ -1,9 +1,9 @@
 import { createElement, useState, useEffect, useCallback, useRef } from "react";
 import { APIProvider, Map, useMap } from "@vis.gl/react-google-maps";
 
-import { createPolygon } from "./Polygon";
+import { clearPolygons, createPolygon } from "./Polygon";
 import { createLabel } from "./Label";
-import { clearMapItems, createClusterer, clusterMap } from "./Map";
+import { createClusterer } from "./Clusterer";
 
 export function MapContainer(props) {
     const [state, setState] = useState({
@@ -118,12 +118,9 @@ export function MapContainer(props) {
         // first we load through the coordinates and position the map to fit them
         positionMap();
 
-        // Clear existing items if we have any
+        // Clear existing polygons if we have any
         if (polygonsRef.current.length > 0) {
-            clearMapItems(polygonsRef.current);
-        }
-        if (labelsRef.current.length > 0) {
-            clearMapItems(labelsRef.current);
+            clearPolygons(polygonsRef.current);
         }
 
         // then we load through the polygondata and create the polygons and labels
@@ -140,8 +137,11 @@ export function MapContainer(props) {
                 )
             );
 
-            // then we cluster the labels
-            clusterMap(newLabels, labelCluster);
+            // Update the clusterer with new markers
+            if (labelCluster) {
+                labelCluster.clearMarkers();
+                labelCluster.addMarkers(newLabels);
+            }
 
             // Update refs with new polygons and labels
             polygonsRef.current = newPolygons;
@@ -202,9 +202,7 @@ export function MapContainer(props) {
         }
 
         return () => {
-            console.log("Component will unmount");
-            clearMapItems(polygonsRef.current);
-            clearMapItems(labelsRef.current);
+            clearPolygons(polygonsRef.current);
         };
     }, [props.dutchImagery, state.map]);
 
@@ -225,15 +223,7 @@ export function MapContainer(props) {
                 }
             }
         }
-    }, [
-        props.polygonList,
-        props.fullReload,
-        props.polygonLabel,
-        props.onClickPolygon,
-        state.map,
-        labelCluster,
-        createPolygonHash
-    ]);
+    }, [props.polygonList, props.fullReload, props.polygonLabel, props.onClickPolygon, state.map, createPolygonHash]);
 
     const { height, width, googleKey, classNames } = props;
     const defaultCenter = { lat: 52.383564, lng: 4.645537 };

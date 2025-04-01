@@ -168,8 +168,8 @@
                 </property>
             </propertyGroup>
              <propertyGroup caption="Caching">
-                <property key="caching" type="boolean" defaultValue="true">
-                    <caption>Cache map for faster loading</caption>
+                <property key="caching" type="boolean" defaultValue="false">
+                    <caption>Cache map for faster loading (experimental)</caption>
                     <description/>
                 </property>
             </propertyGroup>

@@ -1,3 +1,14 @@
+export const clearPolygons = polygons => {
+    if (!Array.isArray(polygons)) {
+        throw new Error("Input is not an array.");
+    }
+
+    polygons.forEach(polygon => {
+        polygon.setMap(null);
+    });
+    polygons.length = 0;
+};
+
 export const createPolygon = (mxObject, maps, props) => {
     const { strokeColor, strokeOpacity, strokeWeight, fillColor, fillOpacity, coordinates } = props;
     try {
