@@ -58,6 +58,31 @@ export function MapContainer(props) {
         }
     }, []);
 
+    const createPolygonHash = useCallback(
+        mxObject => {
+            const attributes = [
+                "coordinates",
+                "fillColor",
+                "fillOpacity",
+                "strokeColor",
+                "strokeOpacity",
+                "strokeWeight",
+                "polygonLabel",
+                "labelColor",
+                "labelSize",
+                "labelClass"
+            ];
+
+            return attributes
+                .map(attr => {
+                    const value = props[attr]?.get(mxObject)?.value;
+                    return `${attr}:${value}`;
+                })
+                .join("|");
+        },
+        [props]
+    );
+
     const createPolygonWithLabel = (
         mxObject,
         map,
@@ -83,31 +108,6 @@ export function MapContainer(props) {
             polygonHashesRef.current.push(createPolygonHash(mxObject));
         }
     };
-
-    const createPolygonHash = useCallback(
-        mxObject => {
-            const attributes = [
-                "coordinates",
-                "fillColor",
-                "fillOpacity",
-                "strokeColor",
-                "strokeOpacity",
-                "strokeWeight",
-                "polygonLabel",
-                "labelColor",
-                "labelSize",
-                "labelClass"
-            ];
-
-            return attributes
-                .map(attr => {
-                    const value = props[attr]?.get(mxObject)?.value;
-                    return `${attr}:${value}`;
-                })
-                .join("|");
-        },
-        [props]
-    );
 
     const loadData = useCallback(() => {
         const { polygonList, polygonLabel, onClickPolygon } = props;
