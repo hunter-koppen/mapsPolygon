@@ -7,62 +7,30 @@ import { clearMapItems, createClusterer, clusterMap } from "./Map";
 
 export function MapContainer(props) {
     const [state, setState] = useState({
-        loaded: false,
         map: null,
-        polygons: [],
-        labels: [],
-        labelCluster: null,
-        clickedPolygon: null,
         currentZoom: null
     });
+    let labelCluster = null;
+    const polygonsRef = useRef([]);
+    const labelsRef = useRef([]);
+    const clickedPolygonRef = useRef(null);
 
-    const prevPolygonListRef = useRef(props.polygonList);
-
-    const handlePolygonClick = useCallback((onClickPolygon, polygon, polygonList) => {
-        if (onClickPolygon && polygon) {
-            const mxObjectClicked = polygonList.items.find(poly => poly.id === polygon.id);
-            if (mxObjectClicked) {
-                onClickPolygon.get(mxObjectClicked).execute();
-            }
-            setState(prev => ({
-                ...prev,
-                clickedPolygon: polygon
-            }));
-        }
-    }, []);
-
-    const loadData = useCallback(() => {
-        const { map, polygons, labels, labelCluster, loaded } = state;
-        const {
-            polygonList,
-            polygonLabel,
-            onClickPolygon,
-            autoZoom,
-            zoom,
-            autoTilt,
-            tilt,
-            panByX,
-            panByY,
-            dutchImagery,
-            coordinates
-        } = props;
-        const newPolygons = [];
-        const newLabels = [];
-
-        if (polygonList.items && map && !loaded) {
+    const positionMap = () => {
+        // this takes all the polygon coordinates and centers the map on it, also handles autoZoom, autoTilt, panByX, panByY
+        if (props.polygonList.items && state.map && !polygonsRef.current.length) {
             const bounds = new google.maps.LatLngBounds();
-            polygonList.items.forEach(mxObject => {
-                const coords = JSON.parse(coordinates.get(mxObject).value);
+            props.polygonList.items.forEach(mxObject => {
+                const coords = JSON.parse(props.coordinates.get(mxObject).value);
                 coords.forEach(coord => {
                     bounds.extend({ lat: coord[1], lng: coord[0] });
                 });
             });
 
-            map.fitBounds(bounds, { animation: false });
+            state.map.fitBounds(bounds, { animation: false });
 
-            if (autoZoom === false && zoom) {
-                const boundsListener = google.maps.event.addListenerOnce(map, "bounds_changed", () => {
-                    setState(prev => ({ ...prev, currentZoom: zoom }));
+            if (props.autoZoom === false && props.zoom) {
+                google.maps.event.addListenerOnce(state.map, "bounds_changed", () => {
+                    setState(prev => ({ ...prev, currentZoom: props.zoom }));
                     // Clear the zoom after a brief moment
                     setTimeout(() => {
                         setState(prev => ({ ...prev, currentZoom: undefined }));
@@ -70,85 +38,93 @@ export function MapContainer(props) {
                 });
             }
 
-            if (autoTilt === false && tilt) {
-                map.setTilt(tilt);
+            if (props.autoTilt === false && props.tilt) {
+                state.map.setTilt(props.tilt);
             }
-            if (panByX !== 0 || panByY !== 0) {
-                map.panBy(panByX, panByY);
+            if (props.panByX !== 0 || props.panByY !== 0) {
+                state.map.panBy(props.panByX, props.panByY);
             }
         }
+    };
 
-        const createPolygonWithLabel = mxObject => {
-            const newPolygon = createPolygon(mxObject, google.maps, props);
-            if (newPolygon) {
-                if (polygonLabel) {
-                    const newLabel = createLabel(mxObject, newPolygon, google.maps, props);
-                    newLabel.setMap(map);
-                    newLabels.push(newLabel);
-                }
-                if (onClickPolygon) {
-                    google.maps.event.addListener(newPolygon, "click", event => {
-                        handlePolygonClick(onClickPolygon, newPolygon, polygonList);
-                    });
-                }
-                newPolygon.setMap(map);
-                newPolygons.push(newPolygon);
+    const handlePolygonClick = useCallback((onClickPolygon, polygon, polygonList) => {
+        if (onClickPolygon && polygon) {
+            const mxObjectClicked = polygonList.items.find(poly => poly.id === polygon.id);
+            if (mxObjectClicked) {
+                onClickPolygon.get(mxObjectClicked).execute();
             }
-        };
+            clickedPolygonRef.current = polygon;
+        }
+    }, []);
 
-        if (polygonList.items && map) {
-            polygonList.items.forEach(createPolygonWithLabel);
-            if (loaded) {
-                clearMapItems(polygons);
-                clearMapItems(labels);
-            } else {
-                setState(prev => ({ ...prev, loaded: true }));
+    const createPolygonWithLabel = (
+        mxObject,
+        map,
+        polygonLabel,
+        onClickPolygon,
+        polygonList,
+        newLabels,
+        newPolygons
+    ) => {
+        const newPolygon = createPolygon(mxObject, google.maps, props);
+        if (newPolygon) {
+            if (polygonLabel) {
+                const newLabel = createLabel(mxObject, newPolygon, google.maps, props);
+                newLabel.setMap(map);
+                newLabels.push(newLabel);
             }
-
-            if (dutchImagery) {
-                const WMSLayer = new google.maps.ImageMapType({
-                    // eslint-disable-next-line space-before-function-paren
-                    getTileUrl: function (coord, gZoom) {
-                        var z2 = Math.pow(2, gZoom);
-                        var tileX = coord.x % z2;
-                        if (tileX < 0) tileX += z2;
-                        var tileY = coord.y;
-
-                        var url =
-                            `https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0/Actueel_orthoHR/` +
-                            `OGC:1.0:GoogleMapsCompatible/${gZoom}/${tileX}/${tileY}.jpeg`;
-                        return url;
-                    },
-                    tileSize: new google.maps.Size(256, 256),
-                    name: "Dutch Aerial Imagery",
-                    maxZoom: 21
+            if (onClickPolygon) {
+                google.maps.event.addListener(newPolygon, "click", event => {
+                    handlePolygonClick(onClickPolygon, newPolygon, polygonList);
                 });
-
-                map.overlayMapTypes.push(WMSLayer);
             }
+            newPolygon.setMap(map);
+            newPolygons.push(newPolygon);
+        }
+    };
 
+    const loadData = useCallback(() => {
+        const { polygonList, polygonLabel, onClickPolygon } = props;
+        const newPolygons = [];
+        const newLabels = [];
+
+        // first we load through the coordinates and position the map to fit them
+        positionMap();
+
+        // Clear existing items if we have any
+        if (polygonsRef.current.length > 0) {
+            clearMapItems(polygonsRef.current);
+        }
+        if (labelsRef.current.length > 0) {
+            clearMapItems(labelsRef.current);
+        }
+
+        // then we load through the polygondata and create the polygons and labels
+        if (polygonList.items && state.map) {
+            polygonList.items.forEach(mxObject =>
+                createPolygonWithLabel(mxObject, state.map, polygonLabel, onClickPolygon, polygonList, newLabels, newPolygons)
+            );
+
+            // then we cluster the labels
             clusterMap(newLabels, labelCluster);
 
-            setState(prev => ({
-                ...prev,
-                polygons: newPolygons,
-                labels: newLabels
-            }));
+            // Update refs with new polygons and labels
+            polygonsRef.current = newPolygons;
+            labelsRef.current = newLabels;
         }
-    }, [state, props]);
+    }, [props, state.map]);
 
     const updatePolygon = useCallback(() => {
-        const { map, polygons, clickedPolygon } = state;
         const { polygonList, onClickPolygon } = props;
 
-        if (polygonList?.items && map) {
-            const clickedObject = polygonList.items.find(poly => poly.id === clickedPolygon.id);
+        if (polygonList?.items && state.map) {
+            const clickedObject = polygonList.items.find(poly => poly.id === clickedPolygonRef.current.id);
             if (clickedObject) {
-                const newPolygons = polygons;
+                const newPolygons = polygonsRef.current;
 
-                const clickedIndex = newPolygons.findIndex(x => x.id === clickedPolygon.id);
+                const clickedIndex = newPolygons.findIndex(x => x.id === clickedPolygonRef.current.id);
                 newPolygons.splice(clickedIndex, 1);
-                clickedPolygon.setMap(null);
+                clickedPolygonRef.current.setMap(null);
 
                 const newPolygon = createPolygon(clickedObject, google.maps, props);
 
@@ -158,53 +134,75 @@ export function MapContainer(props) {
                             handlePolygonClick(onClickPolygon, newPolygon, polygonList);
                         });
                     }
-                    newPolygon.setMap(map);
+                    newPolygon.setMap(state.map);
                     newPolygons.push(newPolygon);
-                    setState(prev => ({
-                        ...prev,
-                        polygons: newPolygons
-                    }));
+                    polygonsRef.current = newPolygons;
                 }
             }
         }
-    }, [state, props]);
+    }, [props, state.map]);
 
-    function MapContent() {
-        const map = useMap();
+    useEffect(() => {
+        // if the dutchImagery prop is true, we add a WMS layer to the map
+        if (props.dutchImagery && state.map && window.google) {
+            const WMSLayer = new window.google.maps.ImageMapType({
+                // eslint-disable-next-line space-before-function-paren
+                getTileUrl: function (coord, gZoom) {
+                    var z2 = Math.pow(2, gZoom);
+                    var tileX = coord.x % z2;
+                    if (tileX < 0) tileX += z2;
+                    var tileY = coord.y;
 
-        useEffect(() => {
-            if (!map) return;
+                    var url =
+                        `https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0/Actueel_orthoHR/` +
+                        `OGC:1.0:GoogleMapsCompatible/${gZoom}/${tileX}/${tileY}.jpeg`;
+                    return url;
+                },
+                tileSize: new google.maps.Size(256, 256),
+                name: "Dutch Aerial Imagery",
+                maxZoom: 21
+            });
 
-            // Initialize map and cluster if not loaded
-            if (!state.loaded) {
-                const labelCluster = createClusterer(map, google.maps);
-                setState(prev => ({ ...prev, map, labelCluster }));
-            }
+            state.map.overlayMapTypes.push(WMSLayer);
+        }
 
-            // Handle polygon loading and updates
-            const { polygonList, fullReload } = props;
-            if (!state.loaded && polygonList?.status === "available") {
-                loadData();
-                return;
-            }
+        return () => {
+            console.log("Component will unmount");
+            clearMapItems(polygonsRef.current);
+            clearMapItems(labelsRef.current);
+        };
+    }, [props.dutchImagery, state.map]);
 
-            if (polygonList.items !== prevPolygonListRef.current?.items) {
+    useEffect(() => {
+        if (!state.map) return;
+
+        // Handle polygon loading and updates
+        const { polygonList, fullReload } = props;
+        if (polygonList?.status === "available") {
+            const currentPolygonIds = polygonsRef.current.map(p => p.id);
+            const newPolygonIds = polygonList.items.map(p => p.id);
+
+            if (JSON.stringify(currentPolygonIds) !== JSON.stringify(newPolygonIds)) {
                 if (fullReload) {
                     loadData();
                 } else {
                     updatePolygon();
                 }
             }
-
-            prevPolygonListRef.current = polygonList;
-        }, [map, props.polygonList, props.fullReload, state.loaded, loadData, updatePolygon]);
-
-        return null;
-    }
+        }
+    }, [props.polygonList, props.fullReload, props.polygonLabel, props.onClickPolygon, state.map, labelCluster]);
 
     const { height, width, googleKey, classNames } = props;
     const defaultCenter = { lat: 52.383564, lng: 4.645537 };
     const defaultZoom = 19;
+
+    function MapContent() {
+        if (!state.map) {
+            const mapInstance = useMap();
+            labelCluster = createClusterer(mapInstance, google.maps);
+            setState(prev => ({ ...prev, map: mapInstance }));
+        }
+    }
 
     return (
         <div style={{ height, width }} className={"mx-polygonmap " + classNames}>
