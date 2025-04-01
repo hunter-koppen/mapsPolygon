@@ -5,7 +5,16 @@ export const clearMapItems = mapItems => {
         throw new Error("Input is not an array.");
     }
 
-    mapItems.forEach(mapItem => mapItem.setMap(null));
+    mapItems.forEach(mapItem => {
+        mapItem.setMap(null);
+        // If this is a marker with a label, explicitly clear the label
+        if (mapItem.getLabel) {
+            const label = mapItem.getLabel();
+            if (label) {
+                mapItem.setLabel(null);
+            }
+        }
+    });
     mapItems.length = 0;
 };
 

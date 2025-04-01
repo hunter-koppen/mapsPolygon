@@ -204,6 +204,7 @@ export function MapContainer(props) {
 
     const { height, width, googleKey, classNames } = props;
     const defaultCenter = { lat: 52.383564, lng: 4.645537 };
+    const defaultZoom = 19;
 
     return (
         <div style={{ height, width }} className={"mx-polygonmap " + classNames}>
@@ -211,6 +212,7 @@ export function MapContainer(props) {
                 <Map
                     reuseMaps={props.caching}
                     defaultCenter={defaultCenter}
+                    defaultZoom={defaultZoom}
                     zoom={state.currentZoom}
                     mapId={props.mapId}
                     mapTypeId={props.mapType}
