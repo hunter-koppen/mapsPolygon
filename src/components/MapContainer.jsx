@@ -14,6 +14,7 @@ export function MapContainer(props) {
     const polygonsRef = useRef([]);
     const labelsRef = useRef([]);
     const clickedPolygonRef = useRef(null);
+    const polygonHashesRef = useRef([]);
 
     const positionMap = () => {
         // this takes all the polygon coordinates and centers the map on it, also handles autoZoom, autoTilt, panByX, panByY
@@ -80,13 +81,40 @@ export function MapContainer(props) {
             }
             newPolygon.setMap(map);
             newPolygons.push(newPolygon);
+            polygonHashesRef.current.push(createPolygonHash(mxObject));
         }
     };
+
+    const createPolygonHash = useCallback(
+        mxObject => {
+            const attributes = [
+                "coordinates",
+                "fillColor",
+                "fillOpacity",
+                "strokeColor",
+                "strokeOpacity",
+                "strokeWeight",
+                "polygonLabel",
+                "labelColor",
+                "labelSize",
+                "labelClass"
+            ];
+
+            return attributes
+                .map(attr => {
+                    const value = props[attr]?.get(mxObject)?.value;
+                    return `${attr}:${value}`;
+                })
+                .join("|");
+        },
+        [props]
+    );
 
     const loadData = useCallback(() => {
         const { polygonList, polygonLabel, onClickPolygon } = props;
         const newPolygons = [];
         const newLabels = [];
+        polygonHashesRef.current = [];
 
         // first we load through the coordinates and position the map to fit them
         positionMap();
@@ -102,7 +130,15 @@ export function MapContainer(props) {
         // then we load through the polygondata and create the polygons and labels
         if (polygonList.items && state.map) {
             polygonList.items.forEach(mxObject =>
-                createPolygonWithLabel(mxObject, state.map, polygonLabel, onClickPolygon, polygonList, newLabels, newPolygons)
+                createPolygonWithLabel(
+                    mxObject,
+                    state.map,
+                    polygonLabel,
+                    onClickPolygon,
+                    polygonList,
+                    newLabels,
+                    newPolygons
+                )
             );
 
             // then we cluster the labels
@@ -179,10 +215,10 @@ export function MapContainer(props) {
         // Handle polygon loading and updates
         const { polygonList, fullReload } = props;
         if (polygonList?.status === "available") {
-            const currentPolygonIds = polygonsRef.current.map(p => p.id);
-            const newPolygonIds = polygonList.items.map(p => p.id);
+            // We create a hash of the polygon data (including all the attributes) to check if the polygon has changed
+            const newPolygonHashes = polygonList.items.map(mxObject => createPolygonHash(mxObject));
 
-            if (JSON.stringify(currentPolygonIds) !== JSON.stringify(newPolygonIds)) {
+            if (JSON.stringify(polygonHashesRef.current) !== JSON.stringify(newPolygonHashes)) {
                 if (fullReload) {
                     loadData();
                 } else {
@@ -190,7 +226,15 @@ export function MapContainer(props) {
                 }
             }
         }
-    }, [props.polygonList, props.fullReload, props.polygonLabel, props.onClickPolygon, state.map, labelCluster]);
+    }, [
+        props.polygonList,
+        props.fullReload,
+        props.polygonLabel,
+        props.onClickPolygon,
+        state.map,
+        labelCluster,
+        createPolygonHash
+    ]);
 
     const { height, width, googleKey, classNames } = props;
     const defaultCenter = { lat: 52.383564, lng: 4.645537 };
