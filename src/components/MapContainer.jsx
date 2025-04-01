@@ -71,7 +71,6 @@ export function MapContainer(props) {
         if (newPolygon) {
             if (polygonLabel) {
                 const newLabel = createLabel(mxObject, newPolygon, google.maps, props);
-                newLabel.setMap(map);
                 newLabels.push(newLabel);
             }
             if (onClickPolygon) {
@@ -267,6 +266,7 @@ export function MapContainer(props) {
                     gestureHandling={props.scrollwheel ? "greedy" : "none"}
                 >
                     <MapContent />
+                    {labelsRef.current}
                 </Map>
             </APIProvider>
         </div>

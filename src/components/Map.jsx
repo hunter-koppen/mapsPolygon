@@ -1,4 +1,7 @@
+import { createElement } from "react";
+
 import { MarkerClusterer, SuperClusterAlgorithm } from "@googlemaps/markerclusterer";
+import { AdvancedMarker } from "@vis.gl/react-google-maps";
 
 export const clearMapItems = mapItems => {
     if (!Array.isArray(mapItems)) {
@@ -21,13 +24,7 @@ export const clearMapItems = mapItems => {
 export const createClusterer = (map, maps) => {
     const renderer = {
         render({ count, position }) {
-            return new maps.Marker({
-                position,
-                icon: {
-                    url: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAA1JREFUGFdjyHQt+g8ABFsCIF75EPIAAAAASUVORK5CYII="
-                },
-                zIndex: 1000 + count
-            });
+            return <AdvancedMarker position={position} zIndex={1000 + count} />;
         }
     };
 
