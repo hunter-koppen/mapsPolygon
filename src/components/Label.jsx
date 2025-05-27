@@ -4,10 +4,10 @@ import { AdvancedMarker, AdvancedMarkerAnchorPoint } from "@vis.gl/react-google-
 
 const LabelContent = ({ mxObject, polygonLabel, labelColor, labelSize, labelClass }) => (
     <div
-        className={labelClass ? labelClass.get(mxObject).value : "polygon-label"}
+        className={labelClass ? labelClass.get(mxObject).value : "'polygon-label'"}
         style={{
-            color: labelColor ? labelColor.get(mxObject).value : "#000",
-            fontSize: labelSize ? labelSize.get(mxObject).value + "px" : "12px"
+            color: labelColor ? labelColor.get(mxObject).value : "'#000'",
+            fontSize: labelSize ? labelSize.get(mxObject).value + "px" : "'12px'"
         }}
     >
         {polygonLabel.get(mxObject).value}
