@@ -1,12 +1,12 @@
 export const clearPolygons = polygons => {
-    if (!Array.isArray(polygons)) {
-        throw new Error("Input is not an array.");
+    if (typeof polygons !== 'object' || polygons === null) {
+        throw new Error("Input is not an object.");
     }
 
-    polygons.forEach(polygon => {
+    Object.values(polygons).forEach(polygon => {
         polygon.setMap(null);
     });
-    polygons.length = 0;
+    Object.keys(polygons).forEach(key => delete polygons[key]);
 };
 
 export const createPolygon = (mxObject, maps, props) => {

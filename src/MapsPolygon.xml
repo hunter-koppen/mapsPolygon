@@ -109,17 +109,17 @@
                     <description />
                     <returnType type="String" />
                 </property>
-                <property key="labelColor" type="expression" defaultValue="#000000" required="false" dataSource="polygonList">
+                <property key="labelColor" type="expression" defaultValue="'#000000'" required="false" dataSource="polygonList">
                     <caption>Label Color</caption>
                     <description />
                     <returnType type="String" />
                 </property>
-                <property key="labelSize" type="expression" defaultValue="12px" required="false" dataSource="polygonList">
+                <property key="labelSize" type="expression" defaultValue="'12px'" required="false" dataSource="polygonList">
                     <caption>Label Font Size</caption>
                     <description />
                     <returnType type="String" />
                 </property>
-                <property key="labelClass" type="expression" defaultValue="polygon-label" required="false" dataSource="polygonList">
+                <property key="labelClass" type="expression" defaultValue="'polygon-label'" required="false" dataSource="polygonList">
                     <caption>Label Custom Classname</caption>
                     <description />
                     <returnType type="String" />

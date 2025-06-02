@@ -11,14 +11,14 @@ export function MapContainer(props) {
         currentZoom: null
     });
     let labelCluster = null;
-    const polygonsRef = useRef([]);
+    const polygonsRef = useRef({});
     const labelsRef = useRef([]);
     const clickedPolygonRef = useRef(null);
     const polygonHashesRef = useRef([]);
 
     const positionMap = () => {
         // this takes all the polygon coordinates and centers the map on it, also handles autoZoom, autoTilt, panByX, panByY
-        if (props.polygonList.items && state.map && !polygonsRef.current.length) {
+        if (props.polygonList.items && state.map && !Object.keys(polygonsRef.current).length) {
             const bounds = new google.maps.LatLngBounds();
             props.polygonList.items.forEach(mxObject => {
                 const coords = JSON.parse(props.coordinates.get(mxObject).value);
@@ -80,7 +80,7 @@ export function MapContainer(props) {
                 })
                 .join("|");
         },
-        [props]
+        [props.coordinates, props.fillColor, props.fillOpacity, props.strokeColor, props.strokeOpacity, props.strokeWeight, props.polygonLabel, props.labelColor, props.labelSize, props.labelClass]
     );
 
     const createPolygonWithLabel = (
@@ -104,79 +104,12 @@ export function MapContainer(props) {
                 });
             }
             newPolygon.setMap(map);
-            newPolygons.push(newPolygon);
+            newPolygons[newPolygon.id] = newPolygon;
             polygonHashesRef.current.push(createPolygonHash(mxObject));
         }
     };
 
-    const loadData = useCallback(() => {
-        const { polygonList, polygonLabel, onClickPolygon } = props;
-        const newPolygons = [];
-        const newLabels = [];
-        polygonHashesRef.current = [];
-
-        // first we load through the coordinates and position the map to fit them
-        positionMap();
-
-        // Clear existing polygons if we have any
-        if (polygonsRef.current.length > 0) {
-            clearPolygons(polygonsRef.current);
-        }
-
-        // then we load through the polygondata and create the polygons and labels
-        if (polygonList.items && state.map) {
-            polygonList.items.forEach(mxObject =>
-                createPolygonWithLabel(
-                    mxObject,
-                    state.map,
-                    polygonLabel,
-                    onClickPolygon,
-                    polygonList,
-                    newLabels,
-                    newPolygons
-                )
-            );
-
-            // Update the clusterer with new markers
-            if (labelCluster) {
-                labelCluster.clearMarkers();
-                labelCluster.addMarkers(newLabels);
-            }
-
-            // Update refs with new polygons and labels
-            polygonsRef.current = newPolygons;
-            labelsRef.current = newLabels;
-        }
-    }, [props, state.map]);
-
-    const updatePolygon = useCallback(() => {
-        const { polygonList, onClickPolygon } = props;
-
-        if (polygonList?.items && state.map) {
-            const clickedObject = polygonList.items.find(poly => poly.id === clickedPolygonRef.current.id);
-            if (clickedObject) {
-                const newPolygons = polygonsRef.current;
-
-                const clickedIndex = newPolygons.findIndex(x => x.id === clickedPolygonRef.current.id);
-                newPolygons.splice(clickedIndex, 1);
-                clickedPolygonRef.current.setMap(null);
-
-                const newPolygon = createPolygon(clickedObject, google.maps, props);
-
-                if (newPolygon) {
-                    if (onClickPolygon) {
-                        google.maps.event.addListener(newPolygon, "click", event => {
-                            handlePolygonClick(onClickPolygon, newPolygon, polygonList);
-                        });
-                    }
-                    newPolygon.setMap(state.map);
-                    newPolygons.push(newPolygon);
-                    polygonsRef.current = newPolygons;
-                }
-            }
-        }
-    }, [props, state.map]);
-
+    // useEffect: Handle Dutch imagery WMS layer overlay
     useEffect(() => {
         // if the dutchImagery prop is true, we add a WMS layer to the map
         if (props.dutchImagery && state.map && window.google) {
@@ -206,24 +139,89 @@ export function MapContainer(props) {
         };
     }, [props.dutchImagery, state.map]);
 
+    // useEffect: Handle polygon data changes and updates
     useEffect(() => {
         if (!state.map) return;
 
         // Handle polygon loading and updates
         const { polygonList, fullReload } = props;
         if (polygonList?.status === "available") {
-            // We create a hash of the polygon data (including all the attributes) to check if the polygon has changed
-            const newPolygonHashes = polygonList.items.map(mxObject => createPolygonHash(mxObject));
+            // Create hash directly here to avoid function dependencies
+            const newPolygonHashes = polygonList.items.map(mxObject => {
+                const attributes = [
+                    "coordinates",
+                    "fillColor", 
+                    "fillOpacity",
+                    "strokeColor",
+                    "strokeOpacity", 
+                    "strokeWeight",
+                    "polygonLabel",
+                    "labelColor",
+                    "labelSize",
+                    "labelClass"
+                ];
+                return attributes
+                    .map(attr => {
+                        const value = props[attr]?.get(mxObject)?.value;
+                        return `${attr}:${value}`;
+                    })
+                    .join("|");
+            });
 
             if (JSON.stringify(polygonHashesRef.current) !== JSON.stringify(newPolygonHashes)) {
                 if (fullReload) {
-                    loadData();
+                    // Direct loadData logic
+                    const newPolygons = {};
+                    const newLabels = [];
+                    polygonHashesRef.current = [];
+                    positionMap();
+                    if (Object.keys(polygonsRef.current).length > 0) {
+                        clearPolygons(polygonsRef.current);
+                    }
+                    if (polygonList.items && state.map) {
+                        polygonList.items.forEach(mxObject =>
+                            createPolygonWithLabel(
+                                mxObject,
+                                state.map,
+                                props.polygonLabel,
+                                props.onClickPolygon,
+                                polygonList,
+                                newLabels,
+                                newPolygons
+                            )
+                        );
+                        if (labelCluster) {
+                            labelCluster.clearMarkers();
+                            labelCluster.addMarkers(newLabels);
+                        }
+                        polygonsRef.current = newPolygons;
+                        labelsRef.current = newLabels;
+                    }
                 } else {
-                    updatePolygon();
+                    // Direct updatePolygon logic
+                    if (polygonList?.items && state.map && clickedPolygonRef.current) {
+                        const clickedId = clickedPolygonRef.current.id;
+                        const clickedObject = polygonList.items.find(poly => poly.id === clickedId);
+                        if (clickedObject && polygonsRef.current[clickedId]) {
+                            polygonsRef.current[clickedId].setMap(null);
+                            delete polygonsRef.current[clickedId];
+                            const newPolygon = createPolygon(clickedObject, google.maps, props);
+                            if (newPolygon) {
+                                if (props.onClickPolygon) {
+                                    google.maps.event.addListener(newPolygon, "click", event => {
+                                        handlePolygonClick(props.onClickPolygon, newPolygon, polygonList);
+                                    });
+                                }
+                                newPolygon.setMap(state.map);
+                                polygonsRef.current[clickedId] = newPolygon;
+                            }
+                        }
+                    }
                 }
+                polygonHashesRef.current = newPolygonHashes;
             }
         }
-    }, [props.polygonList, props.fullReload, props.polygonLabel, props.onClickPolygon, state.map, createPolygonHash]);
+    }, [props.polygonList, props.fullReload, state.map]);
 
     const { height, width, googleKey, classNames } = props;
     const defaultCenter = { lat: 52.383564, lng: 4.645537 };
