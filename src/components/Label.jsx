@@ -1,8 +1,19 @@
 export const createLabel = (mxObject, polygon, maps, props) => {
     const { polygonLabel, labelColor, labelSize, labelClass } = props;
-    const bounds = new maps.LatLngBounds();
-    polygon.getPath().forEach(path => bounds.extend(path));
-    const centroid = bounds.getCenter();
+
+    // Calculate the geometric centroid of the polygon
+    const path = polygon.getPath();
+    let latSum = 0;
+    let lngSum = 0;
+    const pathLength = path.getLength();
+
+    for (let i = 0; i < pathLength; i++) {
+        const point = path.getAt(i);
+        latSum += point.lat();
+        lngSum += point.lng();
+    }
+
+    const centroid = new maps.LatLng(latSum / pathLength, lngSum / pathLength);
 
     const markerLabel = new maps.Marker({
         position: centroid,
