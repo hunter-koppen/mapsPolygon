@@ -15,17 +15,6 @@ export function getProperties(values, defaultProperties, target) {
     return defaultProperties;
 }
 
-export function check(values) {
-    const errors = [];
-    if (values.polygonLabel !== "" && values.mapId === "") {
-        errors.push({
-            property: `mapId`,
-            message: `MapId is required when a polygonLabel is set because labels need the modern vector rendering engine.`
-        });
-    }
-    return errors;
-}
-
 // /**
 //  * @param {Object} values
 //  * @returns {Problem[]} returns a list of problems.
