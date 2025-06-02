@@ -1,5 +1,5 @@
 export const clearPolygons = polygons => {
-    if (typeof polygons !== 'object' || polygons === null) {
+    if (typeof polygons !== "object" || polygons === null) {
         throw new Error("Input is not an object.");
     }
 

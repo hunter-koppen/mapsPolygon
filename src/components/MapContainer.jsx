@@ -1,4 +1,4 @@
-import { createElement, useState, useEffect, useCallback, useRef } from "react";
+import { createElement, useCallback, useEffect, useRef, useState } from "react";
 import { APIProvider, Map, useMap } from "@vis.gl/react-google-maps";
 
 import { clearPolygons, createPolygon } from "./Polygon";
@@ -8,9 +8,9 @@ import { createClusterer } from "./Clusterer";
 export function MapContainer(props) {
     const [state, setState] = useState({
         map: null,
-        currentZoom: null
+        currentZoom: null,
+        labelCluster: null
     });
-    let labelCluster = null;
     const polygonsRef = useRef({});
     const labelsRef = useRef([]);
     const clickedPolygonRef = useRef(null);
@@ -80,7 +80,18 @@ export function MapContainer(props) {
                 })
                 .join("|");
         },
-        [props.coordinates, props.fillColor, props.fillOpacity, props.strokeColor, props.strokeOpacity, props.strokeWeight, props.polygonLabel, props.labelColor, props.labelSize, props.labelClass]
+        [
+            props.coordinates,
+            props.fillColor,
+            props.fillOpacity,
+            props.strokeColor,
+            props.strokeOpacity,
+            props.strokeWeight,
+            props.polygonLabel,
+            props.labelColor,
+            props.labelSize,
+            props.labelClass
+        ]
     );
 
     const createPolygonWithLabel = (
@@ -96,7 +107,9 @@ export function MapContainer(props) {
         if (newPolygon) {
             if (polygonLabel) {
                 const newLabel = createLabel(mxObject, newPolygon, google.maps, props);
-                newLabels.push(newLabel);
+                if (newLabel) {
+                    newLabels.push(newLabel);
+                }
             }
             if (onClickPolygon) {
                 google.maps.event.addListener(newPolygon, "click", event => {
@@ -146,14 +159,13 @@ export function MapContainer(props) {
         // Handle polygon loading and updates
         const { polygonList, fullReload } = props;
         if (polygonList?.status === "available") {
-            // Create hash directly here to avoid function dependencies
             const newPolygonHashes = polygonList.items.map(mxObject => {
                 const attributes = [
                     "coordinates",
-                    "fillColor", 
+                    "fillColor",
                     "fillOpacity",
                     "strokeColor",
-                    "strokeOpacity", 
+                    "strokeOpacity",
                     "strokeWeight",
                     "polygonLabel",
                     "labelColor",
@@ -178,24 +190,59 @@ export function MapContainer(props) {
                     if (Object.keys(polygonsRef.current).length > 0) {
                         clearPolygons(polygonsRef.current);
                     }
+                    // Clear existing labels
+                    if (labelsRef.current.length > 0) {
+                        labelsRef.current.forEach(label => {
+                            if (label && label.cleanup) {
+                                label.cleanup();
+                            }
+                        });
+                        labelsRef.current = [];
+                    }
                     if (polygonList.items && state.map) {
-                        polygonList.items.forEach(mxObject =>
-                            createPolygonWithLabel(
-                                mxObject,
-                                state.map,
-                                props.polygonLabel,
-                                props.onClickPolygon,
-                                polygonList,
-                                newLabels,
-                                newPolygons
-                            )
-                        );
-                        if (labelCluster) {
-                            labelCluster.clearMarkers();
-                            labelCluster.addMarkers(newLabels);
+                        // First create all polygons without labels
+                        polygonList.items.forEach(mxObject => {
+                            const newPolygon = createPolygon(mxObject, google.maps, props);
+                            if (newPolygon) {
+                                if (props.onClickPolygon) {
+                                    google.maps.event.addListener(newPolygon, "click", event => {
+                                        handlePolygonClick(props.onClickPolygon, newPolygon, polygonList);
+                                    });
+                                }
+                                newPolygon.setMap(state.map);
+                                newPolygons[newPolygon.id] = newPolygon;
+                                polygonHashesRef.current.push(createPolygonHash(mxObject));
+                            }
+                        });
+
+                        // Then create labels after a delay to ensure polygon data is ready
+                        if (props.polygonLabel) {
+                            setTimeout(() => {
+                                polygonList.items.forEach(mxObject => {
+                                    const polygon = Object.values(newPolygons).find(p => p.id === mxObject.id);
+                                    if (polygon) {
+                                        const newLabel = createLabel(mxObject, polygon, google.maps, props);
+                                        if (newLabel) {
+                                            newLabels.push(newLabel);
+                                        }
+                                    }
+                                });
+
+                                // Update cluster with the newly created labels
+                                if (state.labelCluster) {
+                                    state.labelCluster.clearMarkers();
+                                    state.labelCluster.addMarkers(newLabels);
+                                }
+                                labelsRef.current = newLabels.filter(label => label !== null);
+                            }, 200);
+                        } else {
+                            // No labels needed, just clear the cluster
+                            if (state.labelCluster) {
+                                state.labelCluster.clearMarkers();
+                            }
                         }
+
                         polygonsRef.current = newPolygons;
-                        labelsRef.current = newLabels;
                     }
                 } else {
                     // Direct updatePolygon logic
@@ -230,8 +277,8 @@ export function MapContainer(props) {
     function MapContent() {
         if (!state.map) {
             const mapInstance = useMap();
-            labelCluster = createClusterer(mapInstance, google.maps);
-            setState(prev => ({ ...prev, map: mapInstance }));
+            const newLabelCluster = createClusterer(mapInstance, google.maps);
+            setState(prev => ({ ...prev, map: mapInstance, labelCluster: newLabelCluster }));
         }
     }
 
@@ -254,7 +301,6 @@ export function MapContainer(props) {
                     gestureHandling={props.scrollwheel ? "greedy" : "none"}
                 >
                     <MapContent />
-                    {labelsRef.current}
                 </Map>
             </APIProvider>
         </div>
