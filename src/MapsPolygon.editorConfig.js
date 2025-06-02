@@ -1,52 +1,3 @@
-/**
- * @typedef Property
- * @type {object}
- * @property {string} key
- * @property {string} caption
- * @property {string} description
- * @property {string[]} objectHeaders
- * @property {ObjectProperties[]} objects
- * @property {Properties[]} properties
- */
-
-/**
- * @typedef ObjectProperties
- * @type {object}
- * @property {PropertyGroup[]} properties
- * @property {string[]} captions
- */
-
-/**
- * @typedef PropertyGroup
- * @type {object}
- * @property {string} caption
- * @property {PropertyGroup[]} propertyGroups
- * @property {Property[]} properties
- */
-
-/**
- * @typedef Properties
- * @type {PropertyGroup}
- */
-
-/**
- * @typedef Problem
- * @type {object}
- * @property {string} property
- * @property {("error" | "warning" | "deprecation")} severity
- * @property {string} message
- * @property {string} studioMessage
- * @property {string} url
- * @property {string} studioUrl
- */
-
-/**
- * @param {object} values
- * @param {Properties} defaultProperties
- * @param {("web"|"desktop")} target
- * @returns {Properties}
- */
-
 import { hidePropertyIn } from "@mendix/pluggable-widgets-tools";
 
 export function getProperties(values, defaultProperties, target) {
@@ -62,6 +13,17 @@ export function getProperties(values, defaultProperties, target) {
         hidePropertyIn(defaultProperties, values, "tilt");
     }
     return defaultProperties;
+}
+
+export function check(values) {
+    const errors = [];
+    if (values.polygonLabel !== "" && values.mapId === "") {
+        errors.push({
+            property: `mapId`,
+            message: `MapId is required when a polygonLabel is set because labels need the modern vector rendering engine.`
+        });
+    }
+    return errors;
 }
 
 // /**
