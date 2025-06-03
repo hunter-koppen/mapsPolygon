@@ -3,7 +3,7 @@ export const createLabel = (mxObject, polygon, maps, props) => {
 
     // Get the label text and ensure it's a valid string
     const labelText = polygonLabel.get(mxObject).value;
-    if (!labelText || typeof labelText !== 'string') {
+    if (!labelText || typeof labelText !== "string") {
         return null; // Don't create label if text is not available or not a string
     }
 
