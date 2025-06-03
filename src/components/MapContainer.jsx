@@ -146,30 +146,11 @@ export function MapContainer(props) {
             ];
 
             const allAttributesAvailable = requiredAttributes.every(
-                attr => props[attr]?.get(polygonList.items[0])?.status === "available"
+                attr => props[attr]?.get(polygonList.items[0])?.status !== "loading"
             );
 
             if (allAttributesAvailable) {
-                const newPolygonHashes = polygonList.items.map(mxObject => {
-                    const attributes = [
-                        "coordinates",
-                        "fillColor",
-                        "fillOpacity",
-                        "strokeColor",
-                        "strokeOpacity",
-                        "strokeWeight",
-                        "polygonLabel",
-                        "labelColor",
-                        "labelSize",
-                        "labelClass"
-                    ];
-                    return attributes
-                        .map(attr => {
-                            const value = props[attr]?.get(mxObject)?.value;
-                            return `${attr}:${value}`;
-                        })
-                        .join("|");
-                });
+                const newPolygonHashes = polygonList.items.map(mxObject => createPolygonHash(mxObject));
 
                 if (JSON.stringify(polygonHashesRef.current) !== JSON.stringify(newPolygonHashes)) {
                     if (fullReload) {
