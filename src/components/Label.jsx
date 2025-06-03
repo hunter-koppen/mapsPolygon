@@ -1,6 +1,12 @@
 export const createLabel = (mxObject, polygon, maps, props) => {
     const { polygonLabel, labelColor, labelSize, labelClass } = props;
 
+    // Get the label text and ensure it's a valid string
+    const labelText = polygonLabel.get(mxObject).value;
+    if (!labelText || typeof labelText !== 'string') {
+        return null; // Don't create label if text is not available or not a string
+    }
+
     // Calculate the geometric centroid of the polygon
     const path = polygon.getPath();
     let latSum = 0;
@@ -18,7 +24,7 @@ export const createLabel = (mxObject, polygon, maps, props) => {
     const markerLabel = new maps.Marker({
         position: centroid,
         label: {
-            text: polygonLabel.get(mxObject).value,
+            text: labelText,
             color: labelColor ? labelColor.get(mxObject).value : "#000",
             fontSize: labelSize ? labelSize.get(mxObject).value + "px" : "12px",
             className: labelClass ? labelClass.get(mxObject).value : "polygon-label"

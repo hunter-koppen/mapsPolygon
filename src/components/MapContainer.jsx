@@ -94,34 +94,6 @@ export function MapContainer(props) {
         ]
     );
 
-    const createPolygonWithLabel = (
-        mxObject,
-        map,
-        polygonLabel,
-        onClickPolygon,
-        polygonList,
-        newLabels,
-        newPolygons
-    ) => {
-        const newPolygon = createPolygon(mxObject, google.maps, props);
-        if (newPolygon) {
-            if (polygonLabel) {
-                const newLabel = createLabel(mxObject, newPolygon, google.maps, props);
-                if (newLabel) {
-                    newLabels.push(newLabel);
-                }
-            }
-            if (onClickPolygon) {
-                google.maps.event.addListener(newPolygon, "click", event => {
-                    handlePolygonClick(onClickPolygon, newPolygon, polygonList);
-                });
-            }
-            newPolygon.setMap(map);
-            newPolygons[newPolygon.id] = newPolygon;
-            polygonHashesRef.current.push(createPolygonHash(mxObject));
-        }
-    };
-
     // useEffect: Handle Dutch imagery WMS layer overlay
     useEffect(() => {
         // if the dutchImagery prop is true, we add a WMS layer to the map
@@ -159,65 +131,83 @@ export function MapContainer(props) {
         // Handle polygon loading and updates
         const { polygonList, fullReload } = props;
         if (polygonList?.status === "available") {
-            const newPolygonHashes = polygonList.items.map(mxObject => {
-                const attributes = [
-                    "coordinates",
-                    "fillColor",
-                    "fillOpacity",
-                    "strokeColor",
-                    "strokeOpacity",
-                    "strokeWeight",
-                    "polygonLabel",
-                    "labelColor",
-                    "labelSize",
-                    "labelClass"
-                ];
-                return attributes
-                    .map(attr => {
-                        const value = props[attr]?.get(mxObject)?.value;
-                        return `${attr}:${value}`;
-                    })
-                    .join("|");
-            });
+            // Check if all required attributes are available for the first object
+            const requiredAttributes = [
+                "coordinates",
+                "fillColor",
+                "fillOpacity",
+                "strokeColor",
+                "strokeOpacity",
+                "strokeWeight",
+                "polygonLabel",
+                "labelColor",
+                "labelSize",
+                "labelClass"
+            ];
 
-            if (JSON.stringify(polygonHashesRef.current) !== JSON.stringify(newPolygonHashes)) {
-                if (fullReload) {
-                    // Direct loadData logic
-                    const newPolygons = {};
-                    const newLabels = [];
-                    polygonHashesRef.current = [];
-                    positionMap();
-                    if (Object.keys(polygonsRef.current).length > 0) {
-                        clearPolygons(polygonsRef.current);
-                    }
-                    // Clear existing labels
-                    if (labelsRef.current.length > 0) {
-                        labelsRef.current.forEach(label => {
-                            if (label && label.cleanup) {
-                                label.cleanup();
-                            }
-                        });
-                        labelsRef.current = [];
-                    }
-                    if (polygonList.items && state.map) {
-                        // First create all polygons without labels
-                        polygonList.items.forEach(mxObject => {
-                            const newPolygon = createPolygon(mxObject, google.maps, props);
-                            if (newPolygon) {
-                                if (props.onClickPolygon) {
-                                    google.maps.event.addListener(newPolygon, "click", event => {
-                                        handlePolygonClick(props.onClickPolygon, newPolygon, polygonList);
-                                    });
+            const allAttributesAvailable = requiredAttributes.every(
+                attr => props[attr]?.get(polygonList.items[0])?.status === "available"
+            );
+
+            if (allAttributesAvailable) {
+                const newPolygonHashes = polygonList.items.map(mxObject => {
+                    const attributes = [
+                        "coordinates",
+                        "fillColor",
+                        "fillOpacity",
+                        "strokeColor",
+                        "strokeOpacity",
+                        "strokeWeight",
+                        "polygonLabel",
+                        "labelColor",
+                        "labelSize",
+                        "labelClass"
+                    ];
+                    return attributes
+                        .map(attr => {
+                            const value = props[attr]?.get(mxObject)?.value;
+                            return `${attr}:${value}`;
+                        })
+                        .join("|");
+                });
+
+                if (JSON.stringify(polygonHashesRef.current) !== JSON.stringify(newPolygonHashes)) {
+                    if (fullReload) {
+                        // Direct loadData logic
+                        const newPolygons = {};
+                        const newLabels = [];
+                        polygonHashesRef.current = [];
+                        positionMap();
+                        if (Object.keys(polygonsRef.current).length > 0) {
+                            clearPolygons(polygonsRef.current);
+                        }
+                        // Clear existing labels
+                        if (labelsRef.current.length > 0) {
+                            labelsRef.current.forEach(label => {
+                                if (label && label.cleanup) {
+                                    label.cleanup();
                                 }
-                                newPolygon.setMap(state.map);
-                                newPolygons[newPolygon.id] = newPolygon;
-                                polygonHashesRef.current.push(createPolygonHash(mxObject));
-                            }
-                        });
+                            });
+                            labelsRef.current = [];
+                        }
+                        if (polygonList.items && state.map) {
+                            // First create all polygons without labels
+                            polygonList.items.forEach(mxObject => {
+                                const newPolygon = createPolygon(mxObject, google.maps, props);
+                                if (newPolygon) {
+                                    if (props.onClickPolygon) {
+                                        google.maps.event.addListener(newPolygon, "click", event => {
+                                            handlePolygonClick(props.onClickPolygon, newPolygon, polygonList);
+                                        });
+                                    }
+                                    newPolygon.setMap(state.map);
+                                    newPolygons[newPolygon.id] = newPolygon;
+                                    polygonHashesRef.current.push(createPolygonHash(mxObject));
+                                }
+                            });
 
-                        // Then create labels after a delay to ensure polygon data is ready
-                        if (props.polygonLabel) {
-                            setTimeout(() => {
+                            // Then create labels after a delay to ensure polygon data is ready
+                            if (props.polygonLabel) {
                                 polygonList.items.forEach(mxObject => {
                                     const polygon = Object.values(newPolygons).find(p => p.id === mxObject.id);
                                     if (polygon) {
@@ -233,42 +223,57 @@ export function MapContainer(props) {
                                     state.labelCluster.clearMarkers();
                                     state.labelCluster.addMarkers(newLabels);
                                 }
-                                labelsRef.current = newLabels.filter(label => label !== null);
-                            }, 200);
-                        } else {
-                            // No labels needed, just clear the cluster
-                            if (state.labelCluster) {
-                                state.labelCluster.clearMarkers();
-                            }
-                        }
-
-                        polygonsRef.current = newPolygons;
-                    }
-                } else {
-                    // Direct updatePolygon logic
-                    if (polygonList?.items && state.map && clickedPolygonRef.current) {
-                        const clickedId = clickedPolygonRef.current.id;
-                        const clickedObject = polygonList.items.find(poly => poly.id === clickedId);
-                        if (clickedObject && polygonsRef.current[clickedId]) {
-                            polygonsRef.current[clickedId].setMap(null);
-                            delete polygonsRef.current[clickedId];
-                            const newPolygon = createPolygon(clickedObject, google.maps, props);
-                            if (newPolygon) {
-                                if (props.onClickPolygon) {
-                                    google.maps.event.addListener(newPolygon, "click", event => {
-                                        handlePolygonClick(props.onClickPolygon, newPolygon, polygonList);
-                                    });
+                                labelsRef.current = newLabels;
+                            } else {
+                                // No labels needed, just clear the cluster
+                                if (state.labelCluster) {
+                                    state.labelCluster.clearMarkers();
                                 }
-                                newPolygon.setMap(state.map);
-                                polygonsRef.current[clickedId] = newPolygon;
+                            }
+
+                            polygonsRef.current = newPolygons;
+                        }
+                    } else {
+                        // Direct updatePolygon logic
+                        if (polygonList?.items && state.map && clickedPolygonRef.current) {
+                            const clickedId = clickedPolygonRef.current.id;
+                            const clickedObject = polygonList.items.find(poly => poly.id === clickedId);
+                            if (clickedObject && polygonsRef.current[clickedId]) {
+                                polygonsRef.current[clickedId].setMap(null);
+                                delete polygonsRef.current[clickedId];
+                                const newPolygon = createPolygon(clickedObject, google.maps, props);
+                                if (newPolygon) {
+                                    if (props.onClickPolygon) {
+                                        google.maps.event.addListener(newPolygon, "click", event => {
+                                            handlePolygonClick(props.onClickPolygon, newPolygon, polygonList);
+                                        });
+                                    }
+                                    newPolygon.setMap(state.map);
+                                    polygonsRef.current[clickedId] = newPolygon;
+                                }
                             }
                         }
                     }
+                    polygonHashesRef.current = newPolygonHashes;
                 }
-                polygonHashesRef.current = newPolygonHashes;
             }
         }
-    }, [props.polygonList, props.fullReload, state.map]);
+    }, [
+        props.polygonList,
+        props.fullReload,
+        state.map,
+        // Add attribute statuses to trigger re-render when they become available
+        props.polygonList?.items?.[0] && props.coordinates?.get(props.polygonList.items[0])?.status,
+        props.polygonList?.items?.[0] && props.fillColor?.get(props.polygonList.items[0])?.status,
+        props.polygonList?.items?.[0] && props.fillOpacity?.get(props.polygonList.items[0])?.status,
+        props.polygonList?.items?.[0] && props.strokeColor?.get(props.polygonList.items[0])?.status,
+        props.polygonList?.items?.[0] && props.strokeOpacity?.get(props.polygonList.items[0])?.status,
+        props.polygonList?.items?.[0] && props.strokeWeight?.get(props.polygonList.items[0])?.status,
+        props.polygonList?.items?.[0] && props.polygonLabel?.get(props.polygonList.items[0])?.status,
+        props.polygonList?.items?.[0] && props.labelColor?.get(props.polygonList.items[0])?.status,
+        props.polygonList?.items?.[0] && props.labelSize?.get(props.polygonList.items[0])?.status,
+        props.polygonList?.items?.[0] && props.labelClass?.get(props.polygonList.items[0])?.status
+    ]);
 
     const { height, width, googleKey, classNames } = props;
     const defaultCenter = { lat: 52.383564, lng: 4.645537 };
