@@ -21,12 +21,18 @@ export const createLabel = (mxObject, polygon, maps, props) => {
 
     const centroid = new maps.LatLng(latSum / pathLength, lngSum / pathLength);
 
+    // Only append "px" when the configured size is a bare number, values like "12px" or "1.2em" pass through as-is
+    let fontSize = labelSize ? labelSize.get(mxObject).value : "12px";
+    if (/^\d+(\.\d+)?$/.test(fontSize)) {
+        fontSize += "px";
+    }
+
     const markerLabel = new maps.Marker({
         position: centroid,
         label: {
             text: labelText,
             color: labelColor ? labelColor.get(mxObject).value : "#000",
-            fontSize: labelSize ? labelSize.get(mxObject).value + "px" : "12px",
+            fontSize,
             className: labelClass ? labelClass.get(mxObject).value : "polygon-label"
         },
         icon: {

@@ -10,7 +10,7 @@ A Google Maps based widget for displaying and interacting with polygons. Its pri
 
 ## Usage
 1. Add a Google Maps API key to the APIKey field.
-2. Add a Datasource for the polygons. The required format is as follows: [[lat1,long1],[lat2,long2],[lat3,long3],[..]]
+2. Add a Datasource for the polygons. The required format is as follows: [[long1,lat1],[long2,lat2],[long3,lat3],[..]] — note that this is the GeoJSON coordinate order (longitude first), which is also what mapshaper.org exports.
 
 Optionally
 - Add labels for each polygon and any other style props like colors and weights.

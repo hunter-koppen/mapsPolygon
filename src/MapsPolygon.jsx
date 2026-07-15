@@ -1,5 +1,3 @@
-import { createElement } from "react";
-
 import { MapContainer } from "./components/MapContainer";
 
 export function MapsPolygon(props) {

@@ -1,4 +1,4 @@
-import { createElement, useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { APIProvider, Map, useMap } from "@vis.gl/react-google-maps";
 
 import { clearPolygons, createPolygon } from "./Polygon";
@@ -20,24 +20,33 @@ function MapContent({ onMapReady }) {
 export function MapContainer(props) {
     const [state, setState] = useState({
         map: null,
-        currentZoom: null,
-        labelCluster: null
+        currentZoom: null
     });
     const polygonsRef = useRef({});
     const labelsRef = useRef([]);
+    const labelClusterRef = useRef(null);
     const clickedPolygonRef = useRef(null);
     const polygonHashesRef = useRef([]);
+    const zoomTimeoutRef = useRef(null);
 
     const positionMap = () => {
         // this takes all the polygon coordinates and centers the map on it, also handles autoZoom, autoTilt, panByX, panByY
         if (props.polygonList.items && state.map && !Object.keys(polygonsRef.current).length) {
             const bounds = new google.maps.LatLngBounds();
             props.polygonList.items.forEach(mxObject => {
-                const coords = JSON.parse(props.coordinates.get(mxObject).value);
-                coords.forEach(coord => {
-                    bounds.extend({ lat: coord[1], lng: coord[0] });
-                });
+                try {
+                    const coords = JSON.parse(props.coordinates.get(mxObject).value);
+                    coords.forEach(coord => {
+                        bounds.extend({ lat: coord[1], lng: coord[0] });
+                    });
+                } catch (error) {
+                    console.log(error);
+                }
             });
+
+            if (bounds.isEmpty()) {
+                return;
+            }
 
             state.map.fitBounds(bounds, { animation: false });
 
@@ -45,7 +54,7 @@ export function MapContainer(props) {
                 google.maps.event.addListenerOnce(state.map, "bounds_changed", () => {
                     setState(prev => ({ ...prev, currentZoom: props.zoom }));
                     // Clear the zoom after a brief moment
-                    setTimeout(() => {
+                    zoomTimeoutRef.current = setTimeout(() => {
                         setState(prev => ({ ...prev, currentZoom: undefined }));
                     }, 100);
                 });
@@ -129,11 +138,16 @@ export function MapContainer(props) {
             });
 
             state.map.overlayMapTypes.push(WMSLayer);
-        }
 
-        return () => {
-            clearPolygons(polygonsRef.current);
-        };
+            return () => {
+                // remove the overlay again so it does not stack on cached (reused) map instances
+                const overlayIndex = state.map.overlayMapTypes.getArray().indexOf(WMSLayer);
+                if (overlayIndex > -1) {
+                    state.map.overlayMapTypes.removeAt(overlayIndex);
+                }
+            };
+        }
+        return undefined;
     }, [props.dutchImagery, state.map]);
 
     // useEffect: Handle polygon data changes and updates
@@ -157,9 +171,9 @@ export function MapContainer(props) {
                 "labelClass"
             ];
 
-            const allAttributesAvailable = requiredAttributes.every(
-                attr => props[attr]?.get(polygonList.items[0])?.status !== "loading"
-            );
+            const allAttributesAvailable =
+                polygonList.items.length === 0 ||
+                requiredAttributes.every(attr => props[attr]?.get(polygonList.items[0])?.status !== "loading");
 
             if (allAttributesAvailable) {
                 const newPolygonHashes = polygonList.items.map(mxObject => createPolygonHash(mxObject));
@@ -174,15 +188,8 @@ export function MapContainer(props) {
                         if (Object.keys(polygonsRef.current).length > 0) {
                             clearPolygons(polygonsRef.current);
                         }
-                        // Clear existing labels
-                        if (labelsRef.current.length > 0) {
-                            labelsRef.current.forEach(label => {
-                                if (label && label.cleanup) {
-                                    label.cleanup();
-                                }
-                            });
-                            labelsRef.current = [];
-                        }
+                        // Clear existing labels, the clusterer removes them from the map via clearMarkers below
+                        labelsRef.current = [];
                         if (polygonList.items && state.map) {
                             // First create all polygons without labels
                             polygonList.items.forEach(mxObject => {
@@ -212,15 +219,15 @@ export function MapContainer(props) {
                                 });
 
                                 // Update cluster with the newly created labels
-                                if (state.labelCluster) {
-                                    state.labelCluster.clearMarkers();
-                                    state.labelCluster.addMarkers(newLabels);
+                                if (labelClusterRef.current) {
+                                    labelClusterRef.current.clearMarkers();
+                                    labelClusterRef.current.addMarkers(newLabels);
                                 }
                                 labelsRef.current = newLabels;
                             } else {
                                 // No labels needed, just clear the cluster
-                                if (state.labelCluster) {
-                                    state.labelCluster.clearMarkers();
+                                if (labelClusterRef.current) {
+                                    labelClusterRef.current.clearMarkers();
                                 }
                             }
 
@@ -269,13 +276,29 @@ export function MapContainer(props) {
     ]);
 
     const onMapReady = useCallback(mapInstance => {
-        setState(prev => {
-            if (prev.map === mapInstance) {
-                return prev;
-            }
-            return { ...prev, map: mapInstance, labelCluster: createClusterer(mapInstance, google.maps) };
-        });
+        if (!labelClusterRef.current) {
+            labelClusterRef.current = createClusterer(mapInstance, google.maps);
+        }
+        setState(prev => (prev.map === mapInstance ? prev : { ...prev, map: mapInstance }));
     }, []);
+
+    // useEffect: Clean up polygons, labels and pending timers on unmount.
+    // Important when caching (reuseMaps) is enabled, since the map instance is recycled across mounts.
+    useEffect(
+        () => () => {
+            if (zoomTimeoutRef.current) {
+                clearTimeout(zoomTimeoutRef.current);
+            }
+            clearPolygons(polygonsRef.current);
+            if (labelClusterRef.current) {
+                labelClusterRef.current.clearMarkers();
+                labelClusterRef.current.setMap(null);
+                labelClusterRef.current = null;
+            }
+            labelsRef.current = [];
+        },
+        []
+    );
 
     const { height, width, googleKey, classNames } = props;
     const defaultCenter = { lat: 52.383564, lng: 4.645537 };
