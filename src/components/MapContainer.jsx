@@ -5,6 +5,18 @@ import { clearPolygons, createPolygon } from "./Polygon";
 import { createLabel } from "./Label";
 import { createClusterer } from "./Clusterer";
 
+function MapContent({ onMapReady }) {
+    const map = useMap();
+
+    useEffect(() => {
+        if (map) {
+            onMapReady(map);
+        }
+    }, [map, onMapReady]);
+
+    return null;
+}
+
 export function MapContainer(props) {
     const [state, setState] = useState({
         map: null,
@@ -256,17 +268,18 @@ export function MapContainer(props) {
         props.polygonList?.items?.[0] && props.labelClass?.get(props.polygonList.items[0])?.status
     ]);
 
+    const onMapReady = useCallback(mapInstance => {
+        setState(prev => {
+            if (prev.map === mapInstance) {
+                return prev;
+            }
+            return { ...prev, map: mapInstance, labelCluster: createClusterer(mapInstance, google.maps) };
+        });
+    }, []);
+
     const { height, width, googleKey, classNames } = props;
     const defaultCenter = { lat: 52.383564, lng: 4.645537 };
     const defaultZoom = 19;
-
-    function MapContent() {
-        if (!state.map) {
-            const mapInstance = useMap();
-            const newLabelCluster = createClusterer(mapInstance, google.maps);
-            setState(prev => ({ ...prev, map: mapInstance, labelCluster: newLabelCluster }));
-        }
-    }
 
     return (
         <div style={{ height, width }} className={"mx-polygonmap " + classNames}>
@@ -286,7 +299,7 @@ export function MapContainer(props) {
                     cameraControl={props.cameraControl}
                     gestureHandling={props.scrollwheel ? "greedy" : "none"}
                 >
-                    <MapContent />
+                    <MapContent onMapReady={onMapReady} />
                 </Map>
             </APIProvider>
         </div>
