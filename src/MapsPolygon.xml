@@ -184,7 +184,7 @@
             <propertyGroup caption="Map Styling">
                 <property key="mapId" type="string" required="false">
                     <caption>Map ID</caption>
-                    <description>Used to apply a custom map style to the map.</description>
+                    <description>Used to apply a custom map style to the map. Also required for rendering labels; when left empty a demo Map ID (DEMO_MAP_ID) with default styling is used.</description>
                 </property>
             </propertyGroup>
         </propertyGroup>

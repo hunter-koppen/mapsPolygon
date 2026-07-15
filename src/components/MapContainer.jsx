@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { APIProvider, Map, useMap } from "@vis.gl/react-google-maps";
+import { APIProvider, Map, useMap, useMapsLibrary } from "@vis.gl/react-google-maps";
 
 import { clearPolygons, createPolygon } from "./Polygon";
 import { createLabel } from "./Label";
@@ -7,12 +7,15 @@ import { createClusterer } from "./Clusterer";
 
 function MapContent({ onMapReady }) {
     const map = useMap();
+    // Labels and clusters use google.maps.marker.AdvancedMarkerElement, so the
+    // map may only be reported ready once the marker library has loaded
+    const markerLibrary = useMapsLibrary("marker");
 
     useEffect(() => {
-        if (map) {
+        if (map && markerLibrary) {
             onMapReady(map);
         }
-    }, [map, onMapReady]);
+    }, [map, markerLibrary, onMapReady]);
 
     return null;
 }
@@ -312,7 +315,7 @@ export function MapContainer(props) {
                     defaultCenter={defaultCenter}
                     defaultZoom={defaultZoom}
                     zoom={state.currentZoom}
-                    mapId={props.mapId}
+                    mapId={props.mapId || "DEMO_MAP_ID"}
                     mapTypeId={props.mapType}
                     disableDefaultUI={true}
                     mapTypeControl={props.mapTypeControl}

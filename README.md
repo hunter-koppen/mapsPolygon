@@ -14,6 +14,7 @@ A Google Maps based widget for displaying and interacting with polygons. Its pri
 
 Optionally
 - Add labels for each polygon and any other style props like colors and weights.
+- Add a Map ID (created in the Google Cloud console) to apply custom map styling. If left empty the widget falls back to Google's DEMO_MAP_ID with default styling, which is required for rendering labels.
 - Add an onclick activity for the polygons, you could change the color of the polygon when clicking and then refreshing.
 - Determine if you want a full reload or not before refreshing, if you only wish to update the last clicked polygon simply set it to false. If you wish to update any other data in the mapview that was not the last clicked polygon on the map you should set it to true. <ins>Note that you can swap this boolean at any time. That way you could set it to true when you are updating the polygon data outside of the onclick action and set it to false when you are changing the data inside the onclick action<ins>
 

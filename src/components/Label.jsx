@@ -27,17 +27,19 @@ export const createLabel = (mxObject, polygon, maps, props) => {
         fontSize += "px";
     }
 
-    const markerLabel = new maps.Marker({
+    const labelElement = document.createElement("div");
+    labelElement.textContent = labelText;
+    labelElement.className = labelClass ? labelClass.get(mxObject).value : "polygon-label";
+    labelElement.style.color = labelColor ? labelColor.get(mxObject).value : "#000";
+    labelElement.style.fontSize = fontSize;
+    // Legacy marker labels were drawn in Roboto and centered on the position;
+    // advanced markers anchor their content bottom-center, so shift down half the height
+    labelElement.style.fontFamily = "Roboto, Arial, sans-serif";
+    labelElement.style.transform = "translateY(50%)";
+
+    const markerLabel = new maps.marker.AdvancedMarkerElement({
         position: centroid,
-        label: {
-            text: labelText,
-            color: labelColor ? labelColor.get(mxObject).value : "#000",
-            fontSize,
-            className: labelClass ? labelClass.get(mxObject).value : "polygon-label"
-        },
-        icon: {
-            url: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAA1JREFUGFdjyHQt+g8ABFsCIF75EPIAAAAASUVORK5CYII="
-        }
+        content: labelElement
     });
     return markerLabel;
 };
